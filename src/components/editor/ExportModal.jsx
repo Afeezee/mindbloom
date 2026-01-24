@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -314,21 +313,266 @@ const exportToPdf = (book) => {
     });
 };
 
-const exportToRtf = async (book) => {
+const exportToWord = async (book) => {
     try {
-        const rtfContent = await generateRtfDocument(book);
-        const blob = new Blob([rtfContent], { type: 'application/rtf' });
+        // Helper function to convert image URL to base64
+        const imageToBase64 = async (url) => {
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            } catch (error) {
+                console.error('Error converting image to base64:', error);
+                return url;
+            }
+        };
+
+        // Convert all images to base64
+        let coverImageBase64 = book.cover_image_url;
+        if (book.cover_image_url) {
+            coverImageBase64 = await imageToBase64(book.cover_image_url);
+        }
+
+        const pagesWithBase64Images = await Promise.all(
+            book.pages.map(async (page) => {
+                if (page.illustration_url) {
+                    const base64Image = await imageToBase64(page.illustration_url);
+                    return { ...page, illustration_base64: base64Image };
+                }
+                return page;
+            })
+        );
+
+        // Get paper size settings
+        const getPaperSettings = (format) => {
+            switch (format) {
+                case "A4 Portrait":
+                    return { size: "A4", width: "8.27in", height: "11.69in", margin: "1in", fontSize: "12pt", titleSize: "24pt" };
+                case "US Letter Portrait":
+                    return { size: "letter", width: "8.5in", height: "11in", margin: "1in", fontSize: "12pt", titleSize: "24pt" };
+                case "A5 Portrait":
+                default:
+                    return { size: "A5", width: "5.83in", height: "8.27in", margin: "0.7in", fontSize: "11pt", titleSize: "20pt" };
+            }
+        };
+
+        const paperSettings = getPaperSettings(book.print_format);
+
+        const wordContent = `
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>${book.title}</title>
+<style>
+@page {
+size: ${paperSettings.size};
+width: ${paperSettings.width};
+height: ${paperSettings.height};
+margin: ${paperSettings.margin};
+}
+body {
+font-family: 'Times New Roman', serif;
+font-size: ${paperSettings.fontSize};
+line-height: 1.5;
+color: #000;
+background: white;
+}
+.cover-page {
+text-align: center;
+page-break-after: always;
+padding: ${book.print_format === 'A5 Portrait' ? '1.5in 0' : '2in 0'};
+}
+.cover-title {
+font-size: ${paperSettings.titleSize};
+font-weight: bold;
+margin: 20px 0;
+color: #2c3e50;
+}
+.cover-author {
+font-size: ${book.print_format === 'A5 Portrait' ? '12pt' : '14pt'};
+font-style: italic;
+color: #666;
+margin: 10px 0;
+}
+.cover-details {
+font-size: ${book.print_format === 'A5 Portrait' ? '10pt' : '12pt'};
+color: #666;
+margin-top: 20px;
+}
+.cover-image {
+max-width: ${book.print_format === 'A5 Portrait' ? '280px' : '400px'};
+max-height: ${book.print_format === 'A5 Portrait' ? '200px' : '300px'};
+margin: 15px auto;
+display: block;
+border: 1px solid #ddd;
+}
+.page-break {
+page-break-before: always;
+}
+.story-page {
+margin-bottom: ${book.print_format === 'A5 Portrait' ? '20px' : '30px'};
+min-height: ${book.print_format === 'A5 Portrait' ? '300px' : '500px'};
+}
+.page-number {
+font-size: ${book.print_format === 'A5 Portrait' ? '9pt' : '10pt'};
+color: #666;
+margin-bottom: 10px;
+font-weight: bold;
+}
+.page-text {
+font-size: ${book.print_format === 'A5 Portrait' ? '12pt' : '14pt'};
+line-height: 1.6;
+margin: 10px 0;
+text-align: justify;
+}
+.page-image {
+max-width: 100%;
+height: auto;
+margin: 10px auto;
+display: block;
+border: 1px solid #ddd;
+}
+.layout-image-left {
+display: table;
+width: 100%;
+}
+.layout-image-left .image-cell {
+display: table-cell;
+width: 45%;
+vertical-align: top;
+padding-right: ${book.print_format === 'A5 Portrait' ? '15px' : '20px'};
+}
+.layout-image-left .text-cell {
+display: table-cell;
+width: 55%;
+vertical-align: top;
+}
+.layout-image-right {
+display: table;
+width: 100%;
+}
+.layout-image-right .text-cell {
+display: table-cell;
+width: 55%;
+vertical-align: top;
+padding-right: ${book.print_format === 'A5 Portrait' ? '15px' : '20px'};
+}
+.layout-image-right .image-cell {
+display: table-cell;
+width: 45%;
+vertical-align: top;
+}
+.end-page {
+text-align: center;
+font-size: ${book.print_format === 'A5 Portrait' ? '16pt' : '18pt'};
+font-weight: bold;
+color: #2c3e50;
+padding-top: ${book.print_format === 'A5 Portrait' ? '1.5in' : '2in'};
+}
+</style>
+</head>
+<body>
+<div class="cover-page">
+${coverImageBase64 ? `<img src="${coverImageBase64}" class="cover-image" alt="Cover Image">` : ''}
+<div class="cover-title">${book.title}</div>
+${book.author_name ? `<div class="cover-author">by ${book.author_name}</div>` : ''}
+<div class="cover-details">
+<p>Target Age: ${book.age_group} years</p>
+<p>Focus: ${book.focus_topic?.replace(/_/g, ' ')}</p>
+<p>Pages: ${book.pages.length}</p>
+<p>Format: ${book.print_format}</p>
+</div>
+</div>
+
+${pagesWithBase64Images.map((page, index) => {
+    const layout = page.layout || 'image-top';
+    let pageHTML = `<div class="story-page ${index > 0 ? 'page-break' : ''}">`;
+    pageHTML += `<div class="page-number">Page ${page.page_number}</div>`;
+    
+    switch (layout) {
+        case 'image-top':
+            if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration">`;
+            }
+            pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+            break;
+            
+        case 'image-bottom':
+            pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+            if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration">`;
+            }
+            break;
+            
+        case 'image-left':
+            pageHTML += `<div class="layout-image-left">`;
+            pageHTML += `<div class="image-cell">`;
+            if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
+            }
+            pageHTML += `</div>`;
+            pageHTML += `<div class="text-cell">`;
+            pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+            pageHTML += `</div></div>`;
+            break;
+            
+        case 'image-right':
+            pageHTML += `<div class="layout-image-right">`;
+            pageHTML += `<div class="text-cell">`;
+            pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+            pageHTML += `</div>`;
+            pageHTML += `<div class="image-cell">`;
+            if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
+            }
+            pageHTML += `</div></div>`;
+            break;
+            
+        case 'full-image':
+            if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="width: 100%; height: auto;">`;
+            }
+            pageHTML += `<div class="page-text" style="background: rgba(255,255,255,0.9); padding: 15px; margin: 10px 0; border-radius: 5px;">${page.text || ''}</div>`;
+            break;
+            
+        case 'text-only':
+        default:
+            pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+            break;
+    }
+    
+    pageHTML += `</div>`;
+    return pageHTML;
+}).join('')}
+
+<div class="page-break">
+<div class="end-page">The End</div>
+</div>
+</body>
+</html>
+        `;
+
+        const blob = new Blob(['\ufeff', wordContent], {
+            type: 'application/msword'
+        });
+        
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${book.title.replace(/[^a-zA-Z0-9]/g, '_')}.rtf`;
+        a.download = `${book.title.replace(/[^a-zA-Z0-9]/g, '_')}.doc`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         return Promise.resolve();
     } catch (error) {
-        console.error('Error generating RTF:', error);
+        console.error('Error generating Word document:', error);
         throw error;
     }
 };
@@ -364,14 +608,14 @@ export default function ExportModal({ bookId, bookTitle, isPublic, onPublicToggl
     setIsExporting(false);
   };
 
-  const handleRtfDownload = async () => {
+  const handleWordDownload = async () => {
     if (!book) return;
     setIsExporting(true);
     try {
-      await exportToRtf(book);
+      await exportToWord(book);
     } catch (error) {
-      console.error("Error generating RTF:", error);
-      alert("Failed to generate RTF file. Please try again.");
+      console.error("Error generating Word document:", error);
+      alert("Failed to generate Word document. Please try again.");
     }
     setIsExporting(false);
   };
@@ -394,12 +638,12 @@ export default function ExportModal({ bookId, bookTitle, isPublic, onPublicToggl
           <div className="grid grid-cols-2 gap-2">
             <Button
               variant="outline"
-              onClick={handleRtfDownload}
+              onClick={handleWordDownload}
               disabled={isExporting}
               className="w-full justify-start"
             >
               {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-              RTF Download
+              Word Download
             </Button>
             <Button
               variant="outline"
