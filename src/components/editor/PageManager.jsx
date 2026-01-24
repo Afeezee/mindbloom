@@ -3,10 +3,35 @@ import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function PageManager({ pages, selectedPage, onSelectPage }) {
+export default function PageManager({ pages, selectedPage, onSelectPage, coverImageUrl }) {
   return (
     <aside className="w-80 bg-white border-r border-gray-100 shadow-md p-4 overflow-y-auto">
       <h2 className="text-lg font-bold text-gray-900 mb-4">Pages</h2>
+      
+      {/* Cover & Synopsis Section */}
+      <div
+        onClick={() => onSelectPage('cover')}
+        className={`mb-4 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+          selectedPage === 'cover'
+            ? 'border-purple-500 bg-purple-50 shadow-md'
+            : 'border-gray-200 bg-white hover:bg-gray-50'
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          {coverImageUrl && (
+            <img
+              src={coverImageUrl}
+              alt="Cover"
+              className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+            />
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-gray-800">Cover & Synopsis</div>
+            <p className="text-sm text-gray-600">Edit cover image and story overview</p>
+          </div>
+        </div>
+      </div>
+
       <Droppable droppableId="pages">
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">

@@ -10,6 +10,7 @@ import { DragDropContext } from "@hello-pangea/dnd";
 import EditorToolbar from "../components/editor/EditorToolbar";
 import PageManager from "../components/editor/PageManager";
 import PageEditor from "../components/editor/PageEditor";
+import CoverEditor from "../components/editor/CoverEditor";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Editor() {
@@ -19,9 +20,9 @@ export default function Editor() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [selectedPage, setSelectedPage] = useState(0);
+  const [selectedPage, setSelectedPage] = useState('cover');
   const [error, setError] = useState(null);
-  const [showExportModal, setShowExportModal] = useState(false); // New state for export modal
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const getBookId = () => {
     const params = new URLSearchParams(window.location.search);
@@ -40,7 +41,7 @@ export default function Editor() {
       if (results && results.length > 0) {
         const fetchedBook = results[0];
         setBook(fetchedBook);
-        setSelectedPage(fetchedBook.pages[0]?.page_number || 1);
+        setSelectedPage('cover');
       } else {
         setError("Could not find the book.");
       }
@@ -251,7 +252,7 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
         await PublicBook.update(fullUpdatedBook.public_book_id, updatedBookData);
       }
 
-      setSelectedPage(1);
+      setSelectedPage('cover');
       
     } catch (error) {
       console.error("Error regenerating story:", error);
@@ -269,6 +270,13 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
       return { ...prevBook, pages: newPages };
     });
   };
+
+  const handleCoverUpdate = (updates) => {
+    setBook((prevBook) => ({
+      ...prevBook,
+      ...updates
+    }));
+  };
   
   const handlePageOrderChange = (result) => {
     if (!result.destination) return;
@@ -281,9 +289,11 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
     setBook(prev => ({...prev, pages: newPages}));
     
     // Adjust selected page if it was moved
-    const newIndexOfSelected = newPages.findIndex(p => p.illustration_prompt === book.pages.find(pg => pg.page_number === selectedPage)?.illustration_prompt);
-    if(newIndexOfSelected !== -1) {
-      setSelectedPage(newIndexOfSelected + 1);
+    if (typeof selectedPage === 'number') {
+      const newIndexOfSelected = newPages.findIndex(p => p.illustration_prompt === book.pages.find(pg => pg.page_number === selectedPage)?.illustration_prompt);
+      if(newIndexOfSelected !== -1) {
+        setSelectedPage(newIndexOfSelected + 1);
+      }
     }
   };
 
@@ -602,7 +612,9 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
     setShowExportModal(false);
   };
 
-  const currentPageData = book?.pages.find((p) => p.page_number === selectedPage);
+  const currentPageData = typeof selectedPage === 'number' 
+    ? book?.pages.find((p) => p.page_number === selectedPage)
+    : null;
 
   if (isCheckingAuth) {
     return (
@@ -664,9 +676,16 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
             pages={book.pages}
             selectedPage={selectedPage}
             onSelectPage={setSelectedPage}
+            coverImageUrl={book.cover_image_url}
           />
           <main className="flex-1 p-8 overflow-y-auto">
-            {currentPageData ? (
+            {selectedPage === 'cover' ? (
+              <CoverEditor
+                book={book}
+                onUpdate={handleCoverUpdate}
+                disabled={isRegenerating}
+              />
+            ) : currentPageData ? (
               <PageEditor
                 page={currentPageData}
                 onUpdate={handlePageUpdate}
