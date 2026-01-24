@@ -392,7 +392,7 @@ const generateWordDownload = async (book) => {
     <body>
       <!-- Cover Page -->
       <div class="cover-page">
-        ${book.cover_image_url ? `<img src="${book.cover_image_url}" class="cover-image" alt="Cover Image">` : ''}
+        ${coverImageBase64 ? `<img src="${coverImageBase64}" class="cover-image" alt="Cover Image">` : ''}
         <div class="cover-title">${book.title}</div>
         ${book.author_name ? `<div class="cover-author">by ${book.author_name}</div>` : ''}
         <div class="cover-details">
@@ -404,7 +404,7 @@ const generateWordDownload = async (book) => {
       </div>
       
       <!-- Story Pages -->
-      ${book.pages.map((page, index) => {
+      ${pagesWithBase64Images.map((page, index) => {
         const layout = page.layout || 'image-top';
         let pageHTML = `<div class="story-page ${index > 0 ? 'page-break' : ''}">`;
         pageHTML += `<div class="page-number">Page ${page.page_number}</div>`;
