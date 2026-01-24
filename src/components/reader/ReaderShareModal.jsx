@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -194,6 +193,39 @@ const getPageDimensions = (format) => {
 };
 
 const generateWordDownload = async (book) => {
+  // Helper function to convert image URL to base64
+  const imageToBase64 = async (url) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting image to base64:', error);
+      return url; // Fallback to URL if conversion fails
+    }
+  };
+
+  // Convert all images to base64
+  let coverImageBase64 = book.cover_image_url;
+  if (book.cover_image_url) {
+    coverImageBase64 = await imageToBase64(book.cover_image_url);
+  }
+
+  const pagesWithBase64Images = await Promise.all(
+    book.pages.map(async (page) => {
+      if (page.illustration_url) {
+        const base64Image = await imageToBase64(page.illustration_url);
+        return { ...page, illustration_base64: base64Image };
+      }
+      return page;
+    })
+  );
+
   // Get paper size settings based on book format
   const getPaperSettings = (format) => {
     switch (format) {
