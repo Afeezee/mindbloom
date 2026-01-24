@@ -411,24 +411,24 @@ const generateWordDownload = async (book) => {
         
         switch (layout) {
           case 'image-top':
-            if (page.illustration_url) {
-              pageHTML += `<img src="${page.illustration_url}" class="page-image" alt="Page ${page.page_number} illustration">`;
+            if (page.illustration_base64) {
+              pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration">`;
             }
             pageHTML += `<div class="page-text">${page.text || ''}</div>`;
             break;
             
           case 'image-bottom':
             pageHTML += `<div class="page-text">${page.text || ''}</div>`;
-            if (page.illustration_url) {
-              pageHTML += `<img src="${page.illustration_url}" class="page-image" alt="Page ${page.page_number} illustration">`;
+            if (page.illustration_base64) {
+              pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration">`;
             }
             break;
             
           case 'image-left':
             pageHTML += `<div class="layout-image-left">`;
             pageHTML += `<div class="image-cell">`;
-            if (page.illustration_url) {
-              pageHTML += `<img src="${page.illustration_url}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
+            if (page.illustration_base64) {
+              pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
             }
             pageHTML += `</div>`;
             pageHTML += `<div class="text-cell">`;
@@ -442,15 +442,15 @@ const generateWordDownload = async (book) => {
             pageHTML += `<div class="page-text">${page.text || ''}</div>`;
             pageHTML += `</div>`;
             pageHTML += `<div class="image-cell">`;
-            if (page.illustration_url) {
-              pageHTML += `<img src="${page.illustration_url}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
+            if (page.illustration_base64) {
+              pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
             }
             pageHTML += `</div></div>`;
             break;
             
           case 'full-image':
-            if (page.illustration_url) {
-              pageHTML += `<img src="${page.illustration_url}" class="page-image" alt="Page ${page.page_number} illustration" style="width: 100%; height: auto;">`;
+            if (page.illustration_base64) {
+              pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="width: 100%; height: auto;">`;
             }
             pageHTML += `<div class="page-text" style="background: rgba(255,255,255,0.9); padding: 15px; margin: 10px 0; border-radius: 5px;">${page.text || ''}</div>`;
             break;
