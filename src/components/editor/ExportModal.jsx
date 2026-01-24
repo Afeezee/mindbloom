@@ -662,18 +662,17 @@ export default function ExportModal({ bookId, bookTitle, isPublic, onPublicToggl
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center gap-2">
               {isPublic ? <Globe className="w-4 h-4 text-green-600" /> : <Lock className="w-4 h-4 text-gray-500" />}
-              <span className="text-sm font-medium">
-                {isPublic ? "Public" : "Private"}
-              </span>
+              <div>
+                <span className="text-sm font-medium block">
+                  {isPublic ? "Public" : "Private"}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {isPublic ? "Anyone with the link can view" : "Only you can view"}
+                </span>
+              </div>
             </div>
             <Switch checked={isPublic} onCheckedChange={handleToggle} />
           </div>
-          <p className="text-sm text-gray-600">
-            {isPublic 
-              ? "Anyone with the link can view this story" 
-              : "Only you can access this story"
-            }
-          </p>
         </div>
 
         {isPublic && publicBookId && (
