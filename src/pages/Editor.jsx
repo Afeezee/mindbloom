@@ -695,9 +695,9 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
                 </button>
                 <button 
                   className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 transition ease-in-out duration-150"
-                  onClick={handleExportRtf} // Placeholder action
+                  onClick={handleExportWord}
                 >
-                  Export as RTF
+                  Export as Word
                 </button>
               </div>
               <button
