@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -67,9 +66,16 @@ export default function Layout({ children, currentPageName }) {
     fetchUser();
   }, []);
 
-  if (currentPageName === "Landing") {
+  if (currentPageName === "Landing" || currentPageName === "Reader") {
     return <>{children}</>;
   }
+
+  const handleNavClick = (e, url) => {
+    if (!user) {
+      e.preventDefault();
+      window.location.href = "https://mindbloom.cereustechnologies.com";
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -163,7 +169,7 @@ export default function Layout({ children, currentPageName }) {
                               : 'hover:bg-gray-50'
                           }`}
                         >
-                          <Link to={item.url} className="flex items-center gap-4">
+                          <Link to={item.url} onClick={(e) => handleNavClick(e, item.url)} className="flex items-center gap-4">
                             <div className={`p-2 rounded-lg ${item.color} bg-opacity-10`}>
                               <item.icon className={`w-5 h-5 ${item.color}`} />
                             </div>
