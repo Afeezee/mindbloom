@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Book } from "@/entities/Book";
 import { PublicBook } from "@/entities/PublicBook";
@@ -342,52 +341,265 @@ Make sure the story flows well across all ${book.page_length} pages and teaches 
     setShowExportModal(false); // Close the export modal
   };
 
-  const handleExportRtf = () => {
+  const handleExportWord = async () => {
     if (!book) return;
 
-    // Basic RTF structure
-    let rtfContent = `{\\rtf1\\ansi\\deff0\n`;
-    rtfContent += `{\\fonttbl{\\f0\\fswiss\\fcharset0 Arial;}}\n`;
-    rtfContent += `{\\pard\\sa200\\sl276\\slmult1\\f0\\fs24\n`; // Default paragraph formatting
+    // Helper function to convert image URL to base64
+    const imageToBase64 = async (url) => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+        return url;
+      }
+    };
 
-    // Title
-    rtfContent += `\\qc\\b\\fs48 ${book.title}\\par\n`; // Centered, bold, larger font
-    rtfContent += `\\par\n`; // Blank line
-
-    // Cover Image Placeholder (RTF has complex image embedding, so we'll just link or describe)
+    // Convert all images to base64
+    let coverImageBase64 = book.cover_image_url;
     if (book.cover_image_url) {
-        rtfContent += `\\qc {\\f0\\fs24 [Cover Image: ${book.cover_image_url}]}\\par\n`;
-        rtfContent += `\\par\n`;
+      coverImageBase64 = await imageToBase64(book.cover_image_url);
     }
 
-    // Pages content
-    book.pages.forEach(page => {
-      rtfContent += `\\page\n`; // Page break
-      rtfContent += `\\ql\\b Page ${page.page_number}\\par\n`; // Left align, bold page number
-      // Replace newlines with RTF paragraph breaks, escape backslashes and braces
-      const escapedText = page.text.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par ');
-      rtfContent += `\\pard\\sa200\\sl276\\slmult1\\f0\\fs24 ${escapedText}\\par\n`; // Page text
-      if (page.illustration_url) {
-        rtfContent += `\\pard\\qc {\\f0\\fs24 [Illustration for page ${page.page_number}: ${page.illustration_url}]}\\par\n`;
+    const pagesWithBase64Images = await Promise.all(
+      book.pages.map(async (page) => {
+        if (page.illustration_url) {
+          const base64Image = await imageToBase64(page.illustration_url);
+          return { ...page, illustration_base64: base64Image };
+        }
+        return page;
+      })
+    );
+
+    // Get paper size settings
+    const getPaperSettings = (format) => {
+      switch (format) {
+        case "A4 Portrait":
+          return { size: "A4", width: "8.27in", height: "11.69in", margin: "1in", fontSize: "12pt", titleSize: "24pt" };
+        case "US Letter Portrait":
+          return { size: "letter", width: "8.5in", height: "11in", margin: "1in", fontSize: "12pt", titleSize: "24pt" };
+        case "A5 Portrait":
+        default:
+          return { size: "A5", width: "5.83in", height: "8.27in", margin: "0.7in", fontSize: "11pt", titleSize: "20pt" };
       }
-      rtfContent += `\\par\n`;
+    };
+
+    const paperSettings = getPaperSettings(book.print_format);
+
+    const wordContent = `
+      <!DOCTYPE html>
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>${book.title}</title>
+        <style>
+          @page {
+            size: ${paperSettings.size};
+            width: ${paperSettings.width};
+            height: ${paperSettings.height};
+            margin: ${paperSettings.margin};
+          }
+          body {
+            font-family: 'Times New Roman', serif;
+            font-size: ${paperSettings.fontSize};
+            line-height: 1.5;
+            color: #000;
+            background: white;
+          }
+          .cover-page {
+            text-align: center;
+            page-break-after: always;
+            padding: ${book.print_format === 'A5 Portrait' ? '1.5in 0' : '2in 0'};
+          }
+          .cover-title {
+            font-size: ${paperSettings.titleSize};
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+          }
+          .cover-author {
+            font-size: ${book.print_format === 'A5 Portrait' ? '12pt' : '14pt'};
+            font-style: italic;
+            color: #666;
+            margin: 10px 0;
+          }
+          .cover-details {
+            font-size: ${book.print_format === 'A5 Portrait' ? '10pt' : '12pt'};
+            color: #666;
+            margin-top: 20px;
+          }
+          .cover-image {
+            max-width: ${book.print_format === 'A5 Portrait' ? '280px' : '400px'};
+            max-height: ${book.print_format === 'A5 Portrait' ? '200px' : '300px'};
+            margin: 15px auto;
+            display: block;
+            border: 1px solid #ddd;
+          }
+          .page-break {
+            page-break-before: always;
+          }
+          .story-page {
+            margin-bottom: ${book.print_format === 'A5 Portrait' ? '20px' : '30px'};
+            min-height: ${book.print_format === 'A5 Portrait' ? '300px' : '500px'};
+          }
+          .page-number {
+            font-size: ${book.print_format === 'A5 Portrait' ? '9pt' : '10pt'};
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: bold;
+          }
+          .page-text {
+            font-size: ${book.print_format === 'A5 Portrait' ? '12pt' : '14pt'};
+            line-height: 1.6;
+            margin: 10px 0;
+            text-align: justify;
+          }
+          .page-image {
+            max-width: 100%;
+            height: auto;
+            margin: 10px auto;
+            display: block;
+            border: 1px solid #ddd;
+          }
+          .layout-image-left {
+            display: table;
+            width: 100%;
+          }
+          .layout-image-left .image-cell {
+            display: table-cell;
+            width: 45%;
+            vertical-align: top;
+            padding-right: ${book.print_format === 'A5 Portrait' ? '15px' : '20px'};
+          }
+          .layout-image-left .text-cell {
+            display: table-cell;
+            width: 55%;
+            vertical-align: top;
+          }
+          .layout-image-right {
+            display: table;
+            width: 100%;
+          }
+          .layout-image-right .text-cell {
+            display: table-cell;
+            width: 55%;
+            vertical-align: top;
+            padding-right: ${book.print_format === 'A5 Portrait' ? '15px' : '20px'};
+          }
+          .layout-image-right .image-cell {
+            display: table-cell;
+            width: 45%;
+            vertical-align: top;
+          }
+          .end-page {
+            text-align: center;
+            font-size: ${book.print_format === 'A5 Portrait' ? '16pt' : '18pt'};
+            font-weight: bold;
+            color: #2c3e50;
+            padding-top: ${book.print_format === 'A5 Portrait' ? '1.5in' : '2in'};
+          }
+        </style>
+      </head>
+      <body>
+        <div class="cover-page">
+          ${coverImageBase64 ? `<img src="${coverImageBase64}" class="cover-image" alt="Cover Image">` : ''}
+          <div class="cover-title">${book.title}</div>
+          ${book.author_name ? `<div class="cover-author">by ${book.author_name}</div>` : ''}
+          <div class="cover-details">
+            <p>Target Age: ${book.age_group} years</p>
+            <p>Focus: ${book.focus_topic?.replace(/_/g, ' ')}</p>
+            <p>Pages: ${book.pages.length}</p>
+            <p>Format: ${book.print_format}</p>
+          </div>
+        </div>
+        
+        ${pagesWithBase64Images.map((page, index) => {
+          const layout = page.layout || 'image-top';
+          let pageHTML = `<div class="story-page ${index > 0 ? 'page-break' : ''}">`;
+          pageHTML += `<div class="page-number">Page ${page.page_number}</div>`;
+          
+          switch (layout) {
+            case 'image-top':
+              if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration">`;
+              }
+              pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+              break;
+              
+            case 'image-bottom':
+              pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+              if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration">`;
+              }
+              break;
+              
+            case 'image-left':
+              pageHTML += `<div class="layout-image-left">`;
+              pageHTML += `<div class="image-cell">`;
+              if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
+              }
+              pageHTML += `</div>`;
+              pageHTML += `<div class="text-cell">`;
+              pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+              pageHTML += `</div></div>`;
+              break;
+              
+            case 'image-right':
+              pageHTML += `<div class="layout-image-right">`;
+              pageHTML += `<div class="text-cell">`;
+              pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+              pageHTML += `</div>`;
+              pageHTML += `<div class="image-cell">`;
+              if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="max-width: 100%;">`;
+              }
+              pageHTML += `</div></div>`;
+              break;
+              
+            case 'full-image':
+              if (page.illustration_base64) {
+                pageHTML += `<img src="${page.illustration_base64}" class="page-image" alt="Page ${page.page_number} illustration" style="width: 100%; height: auto;">`;
+              }
+              pageHTML += `<div class="page-text" style="background: rgba(255,255,255,0.9); padding: 15px; margin: 10px 0; border-radius: 5px;">${page.text || ''}</div>`;
+              break;
+              
+            case 'text-only':
+            default:
+              pageHTML += `<div class="page-text">${page.text || ''}</div>`;
+              break;
+          }
+          
+          pageHTML += `</div>`;
+          return pageHTML;
+        }).join('')}
+        
+        <div class="page-break">
+          <div class="end-page">The End</div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', wordContent], {
+      type: 'application/msword'
     });
-
-    rtfContent += `}`; // End RTF document
-
-    // Create a Blob and trigger download
-    const blob = new Blob([rtfContent], { type: 'application/rtf' });
+    
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    // Sanitize book title for filename
-    const filename = `${book.title.replace(/[^a-zA-Z0-9_.-]/g, '_')}.rtf`;
-    a.download = filename;
-    document.body.appendChild(a); // Append to body to make it clickable
-    a.click(); // Programmatically click the link
-    document.body.removeChild(a); // Clean up the temporary link
-    URL.revokeObjectURL(url); // Release the object URL
-    setShowExportModal(false); // Close the export modal
+    a.download = `${book.title.replace(/[^a-zA-Z0-9]/g, '_')}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setShowExportModal(false);
   };
 
   const currentPageData = book?.pages.find((p) => p.page_number === selectedPage);
