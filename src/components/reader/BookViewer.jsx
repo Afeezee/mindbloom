@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -85,7 +84,7 @@ export default function BookViewer({ book }) {
           onClick={goToPrevPage}
           variant="ghost"
           size="icon"
-          className="absolute left-0 md:left-[-50px] top-1/2 -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm w-12 h-12 z-10"
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 rounded-full bg-gray-800/90 hover:bg-gray-900 text-white backdrop-blur-sm w-12 h-12 shadow-lg z-10"
         >
           <ChevronLeft className="w-6 h-6" />
         </Button>
@@ -95,7 +94,7 @@ export default function BookViewer({ book }) {
           onClick={goToNextPage}
           variant="ghost"
           size="icon"
-          className="absolute right-0 md:right-[-50px] top-1/2 -translate-y-1/2 rounded-full bg-white/80 backdrop-blur-sm w-12 h-12 z-10"
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 rounded-full bg-gray-800/90 hover:bg-gray-900 text-white backdrop-blur-sm w-12 h-12 shadow-lg z-10"
         >
           <ChevronRight className="w-6 h-6" />
         </Button>
