@@ -1,19 +1,19 @@
-import Dashboard from './pages/Dashboard';
 import Create from './pages/Create';
-import Library from './pages/Library';
+import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
-import Reader from './pages/Reader';
 import Landing from './pages/Landing';
+import Library from './pages/Library';
+import Reader from './pages/Reader';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
     "Create": Create,
-    "Library": Library,
+    "Dashboard": Dashboard,
     "Editor": Editor,
-    "Reader": Reader,
     "Landing": Landing,
+    "Library": Library,
+    "Reader": Reader,
 }
 
 export const pagesConfig = {

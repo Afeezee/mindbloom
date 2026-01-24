@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Book } from "@/entities/Book";
 import { PublicBook } from "@/entities/PublicBook";
@@ -19,11 +18,23 @@ export default function Reader() {
   const [isPublicView, setIsPublicView] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true); // New state for authentication check
 
+  const [isUnregisteredPublicUser, setIsUnregisteredPublicUser] = useState(false);
+
   const loadBook = useCallback(async () => {
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
     const isPublic = params.get("public") === "true";
     setIsPublicView(isPublic);
+
+    // Check if unregistered user viewing public link
+    if (isPublic) {
+      try {
+        const authenticated = await base44.auth.isAuthenticated();
+        setIsUnregisteredPublicUser(!authenticated);
+      } catch (error) {
+        setIsUnregisteredPublicUser(true);
+      }
+    }
 
     if (!bookId) {
       navigate(createPageUrl("Library"));
@@ -104,7 +115,13 @@ export default function Reader() {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-50 text-red-600">
         <h2 className="text-2xl font-bold mb-4">Story Not Found</h2>
-        <Button onClick={() => navigate(createPageUrl("Library"))}>Back to Library</Button>
+        <Button onClick={() => {
+          if (isUnregisteredPublicUser) {
+            window.location.href = "https://mindbloom.cereustechnologies.com";
+          } else {
+            navigate(createPageUrl("Library"));
+          }
+        }}>Back to {isUnregisteredPublicUser ? "Home" : "Library"}</Button>
       </div>
     );
   }
@@ -129,7 +146,13 @@ export default function Reader() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(createPageUrl("Library"))}
+          onClick={() => {
+            if (isUnregisteredPublicUser) {
+              window.location.href = "https://mindbloom.cereustechnologies.com";
+            } else {
+              navigate(createPageUrl("Library"));
+            }
+          }}
           className="bg-white/50 backdrop-blur-sm rounded-full"
         >
           <X className="w-6 h-6 text-gray-700" />
