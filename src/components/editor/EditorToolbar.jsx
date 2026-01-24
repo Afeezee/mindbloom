@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Save, Eye, X, BookOpen, Loader2, Download, RotateCcw } from "lucide-react";
+import { Save, Eye, X, BookOpen, Loader2, Download, RotateCcw, Lock, Globe } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import ExportOnlyModal from "./ExportOnlyModal";
 
-export default function EditorToolbar({ book, onTitleChange, onSave, isSaving, onRegenerate, isRegenerating }) {
+export default function EditorToolbar({ book, onTitleChange, onSave, isSaving, onRegenerate, isRegenerating, onPublicToggle }) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
@@ -44,6 +46,26 @@ export default function EditorToolbar({ book, onTitleChange, onSave, isSaving, o
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 border-r pr-4">
+                    <Lock className="w-4 h-4 text-gray-500" />
+                    <Switch
+                      id="public-toggle"
+                      checked={book.is_public}
+                      onCheckedChange={onPublicToggle}
+                      disabled={isRegenerating || isSaving}
+                    />
+                    <Globe className="w-4 h-4 text-gray-500" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{book.is_public ? "This story has a public link." : "This story is private."}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             <Link to={createPageUrl(`Reader?id=${book.id}`)} target="_blank">
               <Button variant="outline" className="rounded-lg" disabled={isRegenerating}>
                 <Eye className="w-4 h-4 mr-2" />
