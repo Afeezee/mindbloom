@@ -6,23 +6,21 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Plus, BookOpen, Sparkles, Palette, Users, TrendingUp, Star } from "lucide-react";
-
 import StatsCards from "../components/dashboard/StatsCards";
 import RecentBooks from "../components/dashboard/RecentBooks";
 import WelcomeSection from "../components/dashboard/WelcomeSection";
 import PullToRefresh from "../components/PullToRefresh";
 
 export default function Dashboard() {
-  const navigate = useNavigate(); // Added
+  const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Added
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    checkAuthAndLoad(); // Modified to call checkAuthAndLoad
+    checkAuthAndLoad();
   }, []);
 
-  // Added checkAuthAndLoad function
   const checkAuthAndLoad = async () => {
     try {
       const authenticated = await base44.auth.isAuthenticated();
@@ -33,7 +31,7 @@ export default function Dashboard() {
       setIsCheckingAuth(false);
       loadBooks();
     } catch (error) {
-      console.error("Authentication check failed:", error); // Log error for debugging
+      console.error("Authentication check failed:", error);
       base44.auth.redirectToLogin(window.location.href);
     }
   };
@@ -49,7 +47,6 @@ export default function Dashboard() {
     setIsLoading(false);
   };
 
-  // Conditional rendering for authentication check
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
