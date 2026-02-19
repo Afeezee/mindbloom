@@ -47,6 +47,13 @@ export default function Dashboard() {
     setIsLoading(false);
   };
 
+  const completedBooks = books.filter(book => book.status === "completed");
+  const draftBooks = books.filter(book => book.status === "draft");
+
+  const handleRefresh = useCallback(async () => {
+    await loadBooks();
+  }, []);
+
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
@@ -54,13 +61,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  const completedBooks = books.filter(book => book.status === "completed");
-  const draftBooks = books.filter(book => book.status === "draft");
-
-  const handleRefresh = useCallback(async () => {
-    await loadBooks();
-  }, []);
 
   return (
     <PullToRefresh onRefresh={handleRefresh} className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
