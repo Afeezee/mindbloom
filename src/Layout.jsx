@@ -294,7 +294,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
           </header>
 
-          <div className="flex-1 overflow-auto pb-16 md:pb-0">
+          <div className="flex-1 overflow-auto pb-16 md:pb-0" data-scroll-container>
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
