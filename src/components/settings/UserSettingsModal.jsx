@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MobileSelect from "../MobileSelect";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -190,80 +190,68 @@ export default function UserSettingsModal() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Default Age Group</Label>
-                    <Select 
+                    <MobileSelect
                       value={settings.preferences.default_age_group}
                       onValueChange={(value) => updateSetting('preferences', 'default_age_group', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3-5">3-5 years</SelectItem>
-                        <SelectItem value="6-8">6-8 years</SelectItem>
-                        <SelectItem value="9-12">9-12 years</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      label="Default Age Group"
+                      options={[
+                        { value: "3-5", label: "3-5 years" },
+                        { value: "6-8", label: "6-8 years" },
+                        { value: "9-12", label: "9-12 years" },
+                      ]}
+                    />
                   </div>
 
                   <div>
                     <Label>Default Focus Topic</Label>
-                    <Select 
+                    <MobileSelect
                       value={settings.preferences.default_focus_topic}
                       onValueChange={(value) => updateSetting('preferences', 'default_focus_topic', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="morals">Morals & Values</SelectItem>
-                        <SelectItem value="finance">Financial Literacy</SelectItem>
-                        <SelectItem value="mental_health">Mental Health</SelectItem>
-                        <SelectItem value="career_awareness">Career Awareness</SelectItem>
-                        <SelectItem value="communication_skills">Communication</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      label="Default Focus Topic"
+                      options={[
+                        { value: "morals", label: "Morals & Values" },
+                        { value: "finance", label: "Financial Literacy" },
+                        { value: "mental_health", label: "Mental Health" },
+                        { value: "career_awareness", label: "Career Awareness" },
+                        { value: "communication_skills", label: "Communication" },
+                        { value: "other", label: "Other" },
+                      ]}
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Default Illustration Style</Label>
-                    <Select 
+                    <MobileSelect
                       value={settings.preferences.default_illustration_style}
                       onValueChange={(value) => updateSetting('preferences', 'default_illustration_style', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cartoon">Cartoon</SelectItem>
-                        <SelectItem value="watercolor">Watercolor</SelectItem>
-                        <SelectItem value="vector">Vector</SelectItem>
-                        <SelectItem value="realistic">Realistic</SelectItem>
-                        <SelectItem value="storybook">Storybook</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      label="Default Illustration Style"
+                      options={[
+                        { value: "cartoon", label: "Cartoon" },
+                        { value: "watercolor", label: "Watercolor" },
+                        { value: "vector", label: "Vector" },
+                        { value: "realistic", label: "Realistic" },
+                        { value: "storybook", label: "Storybook" },
+                      ]}
+                    />
                   </div>
 
                   <div>
                     <Label>Default Page Length</Label>
-                    <Select 
+                    <MobileSelect
                       value={settings.preferences.default_page_length.toString()}
                       onValueChange={(value) => updateSetting('preferences', 'default_page_length', parseInt(value))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="6">6 pages</SelectItem>
-                        <SelectItem value="8">8 pages</SelectItem>
-                        <SelectItem value="10">10 pages</SelectItem>
-                        <SelectItem value="12">12 pages</SelectItem>
-                        <SelectItem value="16">16 pages</SelectItem>
-                        <SelectItem value="20">20 pages</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      label="Default Page Length"
+                      options={[
+                        { value: "6", label: "6 pages" },
+                        { value: "8", label: "8 pages" },
+                        { value: "10", label: "10 pages" },
+                        { value: "12", label: "12 pages" },
+                        { value: "16", label: "16 pages" },
+                        { value: "20", label: "20 pages" },
+                      ]}
+                    />
                   </div>
                 </div>
 
