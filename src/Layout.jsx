@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
 import { BookOpen, Home, Plus, Library, Sparkles, LogOut, Settings } from "lucide-react";
+import BottomTabs from "./components/BottomTabs";
 import {
   Sidebar,
   SidebarContent,
@@ -108,32 +110,50 @@ export default function Layout({ children, currentPageName }) {
             --mindbloom-success: 142 71% 45%;
             --mindbloom-background: 210 40% 98%;
             --mindbloom-surface: 0 0% 100%;
+            --foreground: 222 47% 11%;
+            --card: 0 0% 100%;
+            --card-foreground: 222 47% 11%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215 16% 47%;
           }
-          
+          @media (prefers-color-scheme: dark) {
+            :root {
+              --mindbloom-background: 222 47% 7%;
+              --mindbloom-surface: 222 47% 11%;
+              --foreground: 210 40% 98%;
+              --card: 222 47% 11%;
+              --card-foreground: 210 40% 98%;
+              --muted: 217 33% 18%;
+              --muted-foreground: 215 20% 65%;
+              --background: 222 47% 7%;
+              --border: 217 33% 18%;
+              --input: 217 33% 18%;
+            }
+          }
           .mindbloom-gradient {
             background: linear-gradient(135deg, 
               hsl(var(--mindbloom-primary)) 0%, 
               hsl(var(--mindbloom-secondary)) 50%, 
               hsl(var(--mindbloom-accent)) 100%);
           }
-          
           .mindbloom-warm-gradient {
             background: linear-gradient(135deg, 
               hsl(var(--mindbloom-warm)) 0%, 
               hsl(var(--mindbloom-primary)) 100%);
           }
-          
           .animate-float {
             animation: float 6s ease-in-out infinite;
           }
-          
           @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
           }
-          
           .animate-bounce-slow {
             animation: bounce 3s infinite;
+          }
+          button, a, nav, [role="navigation"] {
+            -webkit-user-select: none;
+            user-select: none;
           }
         `}
       </style>
