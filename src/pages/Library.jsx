@@ -165,7 +165,25 @@ export default function Library() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
+    <div
+      ref={containerRef}
+      className="min-h-screen p-4 md:p-8 overflow-y-auto"
+      style={{ backgroundColor: 'hsl(var(--mindbloom-background))', overscrollBehavior: 'none' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull-to-refresh indicator */}
+      {(pullDistance > 0 || isRefreshing) && (
+        <div
+          className="flex items-center justify-center transition-all duration-200"
+          style={{ height: isRefreshing ? 48 : pullDistance, overflow: 'hidden' }}
+        >
+          <div className={`w-7 h-7 rounded-full border-2 border-purple-600 border-t-transparent ${isRefreshing ? 'animate-spin' : ''}`}
+            style={{ transform: `rotate(${pullDistance * 3}deg)` }}
+          />
+        </div>
+      )}
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
