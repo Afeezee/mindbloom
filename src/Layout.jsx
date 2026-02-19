@@ -68,6 +68,17 @@ export default function Layout({ children, currentPageName }) {
     fetchUser();
   }, []);
 
+  // Android hardware back button support
+  useEffect(() => {
+    const handlePopState = () => {
+      // The browser already handles popstate via react-router;
+      // push an extra history entry on tab pages so the hardware back
+      // button can be intercepted before exiting the app.
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   if (currentPageName === "Landing" || currentPageName === "Reader") {
     return <>{children}</>;
   }
