@@ -38,6 +38,33 @@ export default function Library() {
     checkAuthAndLoad();
   }, []);
 
+  // Pull-to-refresh touch handlers
+  const handleTouchStart = (e) => {
+    if (containerRef.current?.scrollTop === 0) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartY.current === null || isRefreshing) return;
+    const delta = e.touches[0].clientY - touchStartY.current;
+    if (delta > 0 && containerRef.current?.scrollTop === 0) {
+      setPullDistance(Math.min(delta * 0.5, PULL_THRESHOLD + 20));
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
+      setIsRefreshing(true);
+      setPullDistance(0);
+      await loadBooks();
+      setIsRefreshing(false);
+    } else {
+      setPullDistance(0);
+    }
+    touchStartY.current = null;
+  };
+
   const checkAuthAndLoad = async () => {
     try {
       const authenticated = await base44.auth.isAuthenticated();
