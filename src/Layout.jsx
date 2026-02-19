@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
-import { BookOpen, Home, Plus, Library, Sparkles, LogOut, Settings } from "lucide-react";
+import { BookOpen, Home, Plus, Library, Sparkles, LogOut, Settings, ChevronLeft } from "lucide-react";
 import BottomTabs from "./components/BottomTabs";
 import {
   Sidebar,
@@ -151,6 +151,9 @@ export default function Layout({ children, currentPageName }) {
           .animate-bounce-slow {
             animation: bounce 3s infinite;
           }
+          html, body {
+            overscroll-behavior: none;
+          }
           button, a, nav, [role="navigation"] {
             -webkit-user-select: none;
             user-select: none;
@@ -268,10 +271,21 @@ export default function Layout({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col bg-white dark:bg-gray-900">
-          <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4 md:hidden shadow-sm select-none">
-            <div className="flex items-center gap-4">
+          <header
+            className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 md:hidden shadow-sm select-none"
+            style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
+          >
+            <div className="flex items-center gap-3">
+              {!["Dashboard"].includes(currentPageName) && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                </button>
+              )}
               <SidebarTrigger className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors duration-200" />
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-1">
                 <div className="w-8 h-8 mindbloom-gradient rounded-xl flex items-center justify-center">
                   <BookOpen className="w-4 h-4 text-white" />
                 </div>

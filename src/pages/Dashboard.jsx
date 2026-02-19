@@ -1,16 +1,16 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Book } from "@/entities/Book";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client"; // Added import
+import { base44 } from "@/api/base44Client";
 import { Plus, BookOpen, Sparkles, Palette, Users, TrendingUp, Star } from "lucide-react";
 
 import StatsCards from "../components/dashboard/StatsCards";
 import RecentBooks from "../components/dashboard/RecentBooks";
 import WelcomeSection from "../components/dashboard/WelcomeSection";
+import PullToRefresh from "../components/PullToRefresh";
 
 export default function Dashboard() {
   const navigate = useNavigate(); // Added
@@ -61,8 +61,12 @@ export default function Dashboard() {
   const completedBooks = books.filter(book => book.status === "completed");
   const draftBooks = books.filter(book => book.status === "draft");
 
+  const handleRefresh = useCallback(async () => {
+    await loadBooks();
+  }, []);
+
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
       <div className="max-w-7xl mx-auto space-y-8">
         <WelcomeSection totalBooks={books.length} />
 

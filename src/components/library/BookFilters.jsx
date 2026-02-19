@@ -1,6 +1,6 @@
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
+import MobileSelect from "../MobileSelect";
 
 export default function BookFilters({ filters, onFiltersChange }) {
   const handleFilterChange = (key, value) => {
@@ -14,44 +14,50 @@ export default function BookFilters({ filters, onFiltersChange }) {
         <span className="font-medium">Filter by:</span>
       </div>
       
-      <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-        <SelectTrigger className="w-32 rounded-lg">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Status</SelectItem>
-          <SelectItem value="draft">Draft</SelectItem>
-          <SelectItem value="completed">Complete</SelectItem>
-          <SelectItem value="published">Published</SelectItem>
-        </SelectContent>
-      </Select>
+      <MobileSelect
+        value={filters.status}
+        onValueChange={(value) => handleFilterChange('status', value)}
+        label="Status"
+        placeholder="All Status"
+        triggerClassName="w-32 rounded-lg"
+        options={[
+          { value: "all", label: "All Status" },
+          { value: "draft", label: "Draft" },
+          { value: "completed", label: "Complete" },
+          { value: "published", label: "Published" },
+        ]}
+      />
 
-      <Select value={filters.age_group} onValueChange={(value) => handleFilterChange('age_group', value)}>
-        <SelectTrigger className="w-32 rounded-lg">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Ages</SelectItem>
-          <SelectItem value="3-5">Ages 3-5</SelectItem>
-          <SelectItem value="6-8">Ages 6-8</SelectItem>
-          <SelectItem value="9-12">Ages 9-12</SelectItem>
-        </SelectContent>
-      </Select>
+      <MobileSelect
+        value={filters.age_group}
+        onValueChange={(value) => handleFilterChange('age_group', value)}
+        label="Age Group"
+        placeholder="All Ages"
+        triggerClassName="w-32 rounded-lg"
+        options={[
+          { value: "all", label: "All Ages" },
+          { value: "3-5", label: "Ages 3-5" },
+          { value: "6-8", label: "Ages 6-8" },
+          { value: "9-12", label: "Ages 9-12" },
+        ]}
+      />
 
-      <Select value={filters.focus_topic} onValueChange={(value) => handleFilterChange('focus_topic', value)}>
-        <SelectTrigger className="w-40 rounded-lg">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Topics</SelectItem>
-          <SelectItem value="morals">Morals & Values</SelectItem>
-          <SelectItem value="finance">Financial Literacy</SelectItem>
-          <SelectItem value="mental_health">Mental Health</SelectItem>
-          <SelectItem value="career_awareness">Career Awareness</SelectItem>
-          <SelectItem value="communication_skills">Communication</SelectItem>
-          <SelectItem value="other">Other</SelectItem>
-        </SelectContent>
-      </Select>
+      <MobileSelect
+        value={filters.focus_topic}
+        onValueChange={(value) => handleFilterChange('focus_topic', value)}
+        label="Topic"
+        placeholder="All Topics"
+        triggerClassName="w-40 rounded-lg"
+        options={[
+          { value: "all", label: "All Topics" },
+          { value: "morals", label: "Morals & Values" },
+          { value: "finance", label: "Financial Literacy" },
+          { value: "mental_health", label: "Mental Health" },
+          { value: "career_awareness", label: "Career Awareness" },
+          { value: "communication_skills", label: "Communication" },
+          { value: "other", label: "Other" },
+        ]}
+      />
     </div>
   );
 }

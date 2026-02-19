@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
@@ -13,6 +13,7 @@ import { Search, Plus, BookOpen, Grid, List } from "lucide-react";
 
 import BookCard from "../components/library/BookCard";
 import BookFilters from "../components/library/BookFilters";
+import PullToRefresh from "../components/PullToRefresh";
 
 export default function Library() {
   const navigate = useNavigate();
@@ -27,43 +28,9 @@ export default function Library() {
     focus_topic: "all"
   });
 
-  // Pull-to-refresh state
-  const [pullDistance, setPullDistance] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const touchStartY = useRef(null);
-  const containerRef = useRef(null);
-  const PULL_THRESHOLD = 70;
-
   useEffect(() => {
     checkAuthAndLoad();
   }, []);
-
-  // Pull-to-refresh touch handlers
-  const handleTouchStart = (e) => {
-    if (containerRef.current?.scrollTop === 0) {
-      touchStartY.current = e.touches[0].clientY;
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (touchStartY.current === null || isRefreshing) return;
-    const delta = e.touches[0].clientY - touchStartY.current;
-    if (delta > 0 && containerRef.current?.scrollTop === 0) {
-      setPullDistance(Math.min(delta * 0.5, PULL_THRESHOLD + 20));
-    }
-  };
-
-  const handleTouchEnd = async () => {
-    if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
-      setIsRefreshing(true);
-      setPullDistance(0);
-      await loadBooks();
-      setIsRefreshing(false);
-    } else {
-      setPullDistance(0);
-    }
-    touchStartY.current = null;
-  };
 
   const checkAuthAndLoad = async () => {
     try {
@@ -164,26 +131,12 @@ export default function Library() {
     );
   }
 
+  const handleRefresh = useCallback(async () => {
+    await loadBooks();
+  }, []);
+
   return (
-    <div
-      ref={containerRef}
-      className="min-h-screen p-4 md:p-8 overflow-y-auto"
-      style={{ backgroundColor: 'hsl(var(--mindbloom-background))', overscrollBehavior: 'none' }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Pull-to-refresh indicator */}
-      {(pullDistance > 0 || isRefreshing) && (
-        <div
-          className="flex items-center justify-center transition-all duration-200"
-          style={{ height: isRefreshing ? 48 : pullDistance, overflow: 'hidden' }}
-        >
-          <div className={`w-7 h-7 rounded-full border-2 border-purple-600 border-t-transparent ${isRefreshing ? 'animate-spin' : ''}`}
-            style={{ transform: `rotate(${pullDistance * 3}deg)` }}
-          />
-        </div>
-      )}
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen p-4 md:p-8" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
