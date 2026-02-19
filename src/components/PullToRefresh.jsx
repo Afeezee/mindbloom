@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 
 const PULL_THRESHOLD = 70;
 
-export default function PullToRefresh({ onRefresh, children, className = "" }) {
+export default function PullToRefresh({ onRefresh, children, className = "", style = {} }) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(null);
@@ -38,7 +38,7 @@ export default function PullToRefresh({ onRefresh, children, className = "" }) {
     <div
       ref={containerRef}
       className={`overflow-y-auto ${className}`}
-      style={{ overscrollBehavior: "none" }}
+      style={{ overscrollBehavior: "none", ...style }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
