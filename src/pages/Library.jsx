@@ -27,6 +27,13 @@ export default function Library() {
     focus_topic: "all"
   });
 
+  // Pull-to-refresh state
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const touchStartY = useRef(null);
+  const containerRef = useRef(null);
+  const PULL_THRESHOLD = 70;
+
   useEffect(() => {
     checkAuthAndLoad();
   }, []);
