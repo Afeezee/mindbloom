@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Bell, Save, User as UserIcon } from "lucide-react";
+import { Settings, Bell, Save, Trash2, User as UserIcon } from "lucide-react";
 import { User as UserEntity } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 
 export default function UserSettingsModal() {
   const [user, setUser] = useState(null);
