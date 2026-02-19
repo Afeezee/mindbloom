@@ -155,6 +155,12 @@ export default function Layout({ children, currentPageName }) {
             -webkit-user-select: none;
             user-select: none;
           }
+          @media (max-width: 768px) {
+            button, [role="button"] {
+              min-height: 44px;
+              min-width: 44px;
+            }
+          }
         `}
       </style>
       <div className="min-h-screen flex w-full" style={{ backgroundColor: 'hsl(var(--mindbloom-background))' }}>
