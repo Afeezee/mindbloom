@@ -261,24 +261,36 @@ export default function Layout({ children, currentPageName }) {
           </SidebarContent>
         </Sidebar>
 
-        <main className="flex-1 flex flex-col bg-white">
-          <header className="bg-white border-b border-gray-100 px-6 py-4 md:hidden shadow-sm">
+        <main className="flex-1 flex flex-col bg-white dark:bg-gray-900">
+          <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4 md:hidden shadow-sm select-none">
             <div className="flex items-center gap-4">
-              <SidebarTrigger className="hover:bg-gray-100 p-2 rounded-lg transition-colors duration-200" />
+              <SidebarTrigger className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors duration-200" />
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 mindbloom-gradient rounded-xl flex items-center justify-center">
                   <BookOpen className="w-4 h-4 text-white" />
                 </div>
-                <h1 className="text-lg font-bold text-gray-900">MindBloom</h1>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">MindBloom</h1>
               </div>
             </div>
           </header>
 
-          <div className="flex-1 overflow-auto">
-            {children}
+          <div className="flex-1 overflow-auto pb-16 md:pb-0">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -24 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="h-full"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </main>
       </div>
+      <BottomTabs onNavClick={handleNavClick} />
     </SidebarProvider>
   );
 }
