@@ -29,7 +29,10 @@ export default function EditorToolbar({ book, onTitleChange, onSave, isSaving, o
 
   return (
     <>
-      <header className="bg-white border-b border-gray-100 shadow-sm p-4 flex flex-col gap-4">
+      <header
+        className="bg-white border-b border-gray-100 shadow-sm p-4 flex flex-col gap-4"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl("Library"))}>

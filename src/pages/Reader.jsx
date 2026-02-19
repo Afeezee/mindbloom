@@ -128,7 +128,10 @@ export default function Reader() {
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex flex-col items-center justify-center relative p-4">
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+      <div
+        className="absolute top-4 right-4 z-20 flex items-center gap-2"
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 16px)", right: "calc(env(safe-area-inset-right, 0px) + 16px)" }}
+      >
         {!isPublicView && (
           <Dialog>
             <DialogTrigger asChild>
@@ -158,7 +161,10 @@ export default function Reader() {
           <X className="w-6 h-6 text-gray-700" />
         </Button>
       </div>
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/50 backdrop-blur-sm p-2 rounded-full">
+      <div
+        className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/50 backdrop-blur-sm p-2 rounded-full"
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 16px)", left: "calc(env(safe-area-inset-left, 0px) + 16px)" }}
+      >
         <BookOpen className="w-5 h-5 text-purple-600" />
         <h1 className="font-bold text-gray-800">{book.title}</h1>
         {book.author_name && (
