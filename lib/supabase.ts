@@ -39,15 +39,42 @@ type LegacyStoryMetadata = {
   isPublic?: SaveStoryInput['isPublic'];
 };
 
+function extractErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const value = (error as { message?: unknown }).message;
+    if (typeof value === 'string') {
+      return value;
+    }
+  }
+
+  return '';
+}
+
+function extractErrorCode(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    const value = (error as { code?: unknown }).code;
+    if (typeof value === 'string') {
+      return value;
+    }
+  }
+
+  return '';
+}
+
 function isLegacyStorySchemaError(error: unknown) {
-  if (!(error instanceof Error)) {
+  const message = extractErrorMessage(error).toLowerCase();
+  const code = extractErrorCode(error).toUpperCase();
+
+  if (!message && !code) {
     return false;
   }
 
-  const message = error.message.toLowerCase();
-
   return (
-    (message.includes('column') || message.includes('schema cache') || message.includes('could not find')) &&
+    (code === '42703' || message.includes('column') || message.includes('schema cache') || message.includes('could not find')) &&
     (
       message.includes('book_pages') ||
       message.includes('page_count') ||
@@ -309,7 +336,7 @@ export async function saveStory(input: SaveStoryInput): Promise<Story> {
   }
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(extractErrorMessage(error) || 'Unable to save story.');
   }
 
   return mapStory(data);
@@ -430,7 +457,7 @@ export async function updateStory(
   }
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(extractErrorMessage(error) || 'Unable to update story.');
   }
 
   const likeStats = await getLikeStatsByStoryIds([data.id], userId);
