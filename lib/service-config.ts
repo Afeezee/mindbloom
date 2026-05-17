@@ -36,3 +36,8 @@ export const isSupabaseConfigured =
 
 export const supabaseSetupMessage =
   'Add real NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY values to .env.local and restart the app to enable story storage, reads, and likes.';
+
+export const isPollinationsConfigured = hasConfiguredValue(process.env.POLLINATIONS_API_KEY);
+
+export const pollinationsSetupMessage =
+  'Add a real POLLINATIONS_API_KEY to .env.local and restart the app to enable book illustrations.';

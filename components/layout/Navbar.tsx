@@ -2,10 +2,8 @@
 
 import Link from 'next/link';
 import { UserButton } from '@clerk/nextjs';
-import { BookOpen, LayoutDashboard, PlusCircle, ScrollText } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { Compass, LayoutDashboard, PlusCircle, ScrollText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 const navigationItems = [
   {
@@ -22,6 +20,11 @@ const navigationItems = [
     href: '/stories/new',
     label: 'New Story',
     icon: PlusCircle,
+  },
+  {
+    href: '/stories/discover',
+    label: 'Discover',
+    icon: Compass,
   },
 ] as const;
 
@@ -43,7 +46,6 @@ interface NavbarProps {
 }
 
 export function Navbar({ isClerkConfigured }: NavbarProps) {
-  const pathname = usePathname();
   const authControl = isClerkConfigured ? (
     <UserButton afterSignOutUrl="/sign-in" />
   ) : (
@@ -68,17 +70,13 @@ export function Navbar({ isClerkConfigured }: NavbarProps) {
 
         <nav className="flex flex-wrap items-center gap-2" aria-label="Primary navigation">
           {navigationItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const Icon = item.icon;
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition',
-                  isActive ? 'bg-bloom-plum text-white shadow-bloom' : 'bg-white/80 text-slate-600 hover:bg-bloom-cream hover:text-bloom-ink',
-                )}
+                className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-bloom-cream hover:text-bloom-ink"
               >
                 <Icon className="h-4 w-4" />
                 <span>{item.label}</span>

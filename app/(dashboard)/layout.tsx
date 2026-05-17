@@ -13,29 +13,16 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (!isClerkConfigured) {
-    return (
-      <div className="min-h-screen text-bloom-ink">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <div className="flex min-h-screen flex-1 flex-col">
-            <Navbar isClerkConfigured={false} />
-            <main className="flex-1">
-              <div className="section-shell py-8">
-                <ClerkSetupNotice title="Dashboard access is waiting on Clerk setup." />
-              </div>
-            </main>
-            <Footer />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  let showSetupNotice = false;
 
-  const { userId } = await auth();
+  if (isClerkConfigured) {
+    const { userId } = await auth();
 
-  if (!userId) {
-    redirect('/sign-in');
+    if (!userId) {
+      redirect('/sign-in');
+    }
+  } else {
+    showSetupNotice = true;
   }
 
   return (
@@ -43,8 +30,15 @@ export default async function DashboardLayout({
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex min-h-screen flex-1 flex-col">
-          <Navbar isClerkConfigured />
-          <main className="flex-1">{children}</main>
+          <Navbar isClerkConfigured={isClerkConfigured} />
+          <main className="flex-1">
+            {showSetupNotice ? (
+              <div className="section-shell pb-0 pt-8">
+                <ClerkSetupNotice title="Dashboard access is waiting on Clerk setup." />
+              </div>
+            ) : null}
+            {children}
+          </main>
           <Footer />
         </div>
       </div>

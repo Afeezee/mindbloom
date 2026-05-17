@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { format } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
-import { AgeGroup } from '@/lib/types';
+import { AgeGroup, BookSize, LearningFocus } from '@/lib/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,14 +26,34 @@ export function truncateText(text: string, maxLength: number): string {
 export function getAgeGroupLabel(ageGroup: AgeGroup): string {
   switch (ageGroup) {
     case AgeGroup.EARLY:
-      return 'Ages 3-5';
+      return '3-5 years early learners';
     case AgeGroup.MIDDLE:
-      return 'Ages 6-8';
+      return '6-8 years growing minds';
     case AgeGroup.OLDER:
-      return 'Ages 9-12';
+      return '9-12 years independent reader';
     default:
       return ageGroup;
   }
+}
+
+export function getLearningFocusLabel(learningFocus: LearningFocus): string {
+  return learningFocus;
+}
+
+export function getBookSizeLabel(bookSize: BookSize): string {
+  return bookSize;
+}
+
+export function getBookLengthLabel(pageCount: number): string {
+  if (pageCount <= 16) {
+    return 'Quick Story';
+  }
+
+  if (pageCount <= 32) {
+    return 'Standard';
+  }
+
+  return 'Epic Adventure';
 }
 
 export function slugify(text: string): string {

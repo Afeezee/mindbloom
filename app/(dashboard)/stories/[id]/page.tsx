@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
+import { ClerkSetupNotice } from '@/components/auth/ClerkSetupNotice';
 import { ServiceSetupNotice } from '@/components/setup/ServiceSetupNotice';
 import { StoryReader } from '@/components/story/StoryReader';
 import { isClerkConfigured } from '@/lib/clerk-server';
@@ -45,13 +46,21 @@ export async function generateMetadata({ params }: StoryPageProps): Promise<Meta
 
 export default async function StoryPage({ params }: StoryPageProps) {
   if (!isClerkConfigured) {
-    return null;
+    return (
+      <div className="section-shell py-8">
+        <ClerkSetupNotice title="Story reader is waiting on Clerk setup." />
+      </div>
+    );
   }
 
   const { userId } = await auth();
 
   if (!userId) {
-    return null;
+    return (
+      <div className="section-shell py-8">
+        <ClerkSetupNotice title="Sign in to read this story." />
+      </div>
+    );
   }
 
   if (!isSupabaseConfigured) {

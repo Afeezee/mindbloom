@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { Heart, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { StoryCardActions } from '@/components/story/StoryCardActions';
 import { type Story } from '@/lib/types';
-import { formatDate, getAgeGroupLabel, truncateText } from '@/lib/utils';
+import { formatDate, getAgeGroupLabel, getBookSizeLabel, getLearningFocusLabel, truncateText } from '@/lib/utils';
 
 interface StoryCardProps {
   story: Story;
@@ -16,6 +17,8 @@ export function StoryCard({ story }: StoryCardProps) {
         <div className="flex flex-wrap gap-2">
           <Badge variant="plum">{story.theme}</Badge>
           <Badge variant="teal">{getAgeGroupLabel(story.ageGroup)}</Badge>
+          {story.learningFocus ? <Badge variant="gold">{getLearningFocusLabel(story.learningFocus)}</Badge> : null}
+          {story.bookSize ? <Badge variant="outline">{getBookSizeLabel(story.bookSize)}</Badge> : null}
           {story.isPublic ? <Badge variant="gold">Public</Badge> : null}
         </div>
 
@@ -28,6 +31,7 @@ export function StoryCard({ story }: StoryCardProps) {
           <div>
             <p>{formatDate(story.createdAt)}</p>
             <p>{story.wordCount} words</p>
+            {story.pageCount ? <p>{story.pageCount} pages</p> : null}
           </div>
           <div className="flex items-center gap-2 rounded-full bg-bloom-cream px-3 py-2 font-semibold text-bloom-ink">
             <Heart className="h-4 w-4 text-bloom-coral" />
@@ -42,6 +46,8 @@ export function StoryCard({ story }: StoryCardProps) {
           Read story
           <ArrowRight className="h-4 w-4" />
         </Link>
+
+        <StoryCardActions storyId={story.id} isPublic={story.isPublic} />
       </CardContent>
     </Card>
   );

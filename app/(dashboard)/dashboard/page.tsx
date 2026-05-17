@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { currentUser } from '@clerk/nextjs/server';
 import { auth } from '@clerk/nextjs/server';
 import { Sparkles, BookText, Flame, Palette } from 'lucide-react';
+import { ClerkSetupNotice } from '@/components/auth/ClerkSetupNotice';
 import { ServiceSetupNotice } from '@/components/setup/ServiceSetupNotice';
 import { StoryCard } from '@/components/story/StoryCard';
 import { Button } from '@/components/ui/button';
@@ -14,13 +15,21 @@ import { type StoryTheme } from '@/lib/types';
 
 export default async function DashboardPage() {
   if (!isClerkConfigured) {
-    return null;
+    return (
+      <div className="section-shell py-8">
+        <ClerkSetupNotice title="Dashboard stats are waiting on Clerk setup." />
+      </div>
+    );
   }
 
   const [{ userId }, user] = await Promise.all([auth(), currentUser()]);
 
   if (!userId) {
-    return null;
+    return (
+      <div className="section-shell py-8">
+        <ClerkSetupNotice title="Sign in to view your dashboard." />
+      </div>
+    );
   }
 
   if (!isSupabaseConfigured) {

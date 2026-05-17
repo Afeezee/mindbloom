@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ClerkSetupNotice } from '@/components/auth/ClerkSetupNotice';
 import { ServiceSetupNotice } from '@/components/setup/ServiceSetupNotice';
 import { Select } from '@/components/ui/select';
 import { StoryCard } from '@/components/story/StoryCard';
@@ -19,13 +20,21 @@ interface StoriesPageProps {
 
 export default async function StoriesPage({ searchParams }: StoriesPageProps) {
   if (!isClerkConfigured) {
-    return null;
+    return (
+      <div className="section-shell py-8">
+        <ClerkSetupNotice title="Your story library is waiting on Clerk setup." />
+      </div>
+    );
   }
 
   const { userId } = await auth();
 
   if (!userId) {
-    return null;
+    return (
+      <div className="section-shell py-8">
+        <ClerkSetupNotice title="Sign in to view your story library." />
+      </div>
+    );
   }
 
   if (!isSupabaseConfigured) {

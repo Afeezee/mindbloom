@@ -1,9 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Compass, LayoutDashboard, Sparkles, Stars, ScrollText } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 const items = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,8 +10,6 @@ const items = [
 ] as const;
 
 export function Sidebar() {
-  const pathname = usePathname();
-
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-white/50 bg-white/55 px-6 py-8 backdrop-blur-xl xl:flex xl:flex-col">
       <div className="rounded-4xl bg-gradient-to-br from-bloom-plum via-[#7463d7] to-bloom-teal p-6 text-white shadow-bloom">
@@ -28,17 +24,13 @@ export function Sidebar() {
 
       <nav className="mt-8 space-y-2" aria-label="Sidebar navigation">
         {items.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-semibold transition',
-                isActive ? 'bg-white text-bloom-plum shadow-soft' : 'text-slate-600 hover:bg-white/80 hover:text-bloom-ink',
-              )}
+              className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-white/80 hover:text-bloom-ink"
             >
               <Icon className="h-5 w-5" />
               <span>{item.label}</span>

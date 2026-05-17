@@ -1,14 +1,22 @@
 import { z } from 'zod';
 import { groqSetupMessage, isGroqConfigured } from '@/lib/service-config';
-import { AgeGroup, StoryTheme } from '@/lib/types';
-import { generateStoryStream } from '@/lib/groq';
+import { AgeGroup, BookSize, LearningFocus } from '@/lib/types';
+import { generateBookDraft } from '@/lib/groq';
+
+const characterSchema = z.object({
+  name: z.string(),
+  role: z.string(),
+  appearance: z.string(),
+});
 
 const generateStorySchema = z.object({
-  theme: z.nativeEnum(StoryTheme),
+  title: z.string().trim().min(2).max(120),
+  storyIdea: z.string().trim().min(10).max(1000),
+  pageCount: z.number().int().min(8).max(50),
   ageGroup: z.nativeEnum(AgeGroup),
-  mainCharacter: z.string().trim().min(2).max(80),
-  setting: z.string().trim().min(2).max(120),
-  specialElement: z.string().trim().max(120).optional(),
+  learningFocus: z.nativeEnum(LearningFocus),
+  bookSize: z.nativeEnum(BookSize),
+  characters: z.array(characterSchema).optional(),
 });
 
 export async function POST(request: Request) {
@@ -30,19 +38,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const stream = await generateStoryStream(parsedPayload.data);
+    const draft = await generateBookDraft(parsedPayload.data, parsedPayload.data.characters ?? []);
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
-      },
-    });
+    return Response.json({ draft }, { status: 200 });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unexpected story generation error.';
+    
+    // Log detailed error info for debugging
+    if (error instanceof Error) {
+      console.error('Story generation error:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
+    }
+    
     return Response.json(
       {
-        error: error instanceof Error ? error.message : 'Unexpected story generation error.',
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
       },
       { status: 500 },
     );

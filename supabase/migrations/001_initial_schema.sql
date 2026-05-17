@@ -39,6 +39,10 @@ create table if not exists public.stories (
   prompt_used text,
   age_group text check (age_group in ('3-5', '6-8', '9-12')),
   theme text check (theme in ('Adventure', 'Fantasy', 'Animals', 'Science', 'Friendship', 'Mystery')),
+  learning_focus text,
+  book_size text,
+  page_count integer,
+  book_pages jsonb,
   characters text[] not null default '{}',
   word_count integer,
   cover_image_url text,
@@ -58,6 +62,7 @@ create table if not exists public.story_likes (
 create index if not exists stories_user_id_idx on public.stories (user_id);
 create index if not exists stories_theme_idx on public.stories (theme);
 create index if not exists stories_age_group_idx on public.stories (age_group);
+create index if not exists stories_learning_focus_idx on public.stories (learning_focus);
 create index if not exists stories_is_public_idx on public.stories (is_public);
 create index if not exists story_likes_story_id_idx on public.story_likes (story_id);
 create index if not exists story_likes_user_id_idx on public.story_likes (user_id);

@@ -15,6 +15,7 @@ interface StreamingTextProps {
 export function StreamingText({ request, stream, onComplete, onError }: StreamingTextProps) {
   const [text, setText] = useState('');
   const [status, setStatus] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const requestKey = useMemo(() => (request ? JSON.stringify(request) : null), [request]);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export function StreamingText({ request, stream, onComplete, onError }: Streamin
       try {
         setText('');
         setStatus('streaming');
+        setErrorMessage(null);
 
         while (!cancelled) {
           const { done, value } = await reader.read();
@@ -49,8 +51,10 @@ export function StreamingText({ request, stream, onComplete, onError }: Streamin
         }
       } catch (error) {
         if (!cancelled) {
+          const msg = error instanceof Error ? error.message : 'Unable to stream the story.';
           setStatus('error');
-          onError?.(error instanceof Error ? error.message : 'Unable to stream the story.');
+          setErrorMessage(msg);
+          onError?.(msg);
         }
       } finally {
         reader.releaseLock();
@@ -66,6 +70,7 @@ export function StreamingText({ request, stream, onComplete, onError }: Streamin
       if (!request) {
         setStatus('idle');
         setText('');
+        setErrorMessage(null);
         return;
       }
 
@@ -79,8 +84,9 @@ export function StreamingText({ request, stream, onComplete, onError }: Streamin
         });
 
         if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(payload?.error ?? 'Story generation failed.');
+          const payload = (await response.json().catch(() => null)) as { error?: string; details?: string } | null;
+          const errorMsg = payload?.error ?? 'Story generation failed.';
+          throw new Error(errorMsg);
         }
 
         if (!response.body) {
@@ -90,8 +96,10 @@ export function StreamingText({ request, stream, onComplete, onError }: Streamin
         await consume(response.body);
       } catch (error) {
         if (!cancelled) {
+          const msg = error instanceof Error ? error.message : 'Story generation failed.';
           setStatus('error');
-          onError?.(error instanceof Error ? error.message : 'Story generation failed.');
+          setErrorMessage(msg);
+          onError?.(msg);
         }
       }
     }
@@ -118,12 +126,19 @@ export function StreamingText({ request, stream, onComplete, onError }: Streamin
             <div className="mb-4 flex items-center gap-3 text-sm text-white/70">
               {status === 'streaming' ? <LoadingSpinner className="text-white/80" label="Streaming" /> : null}
               {status === 'done' ? <span>Story complete</span> : null}
-              {status === 'error' ? <span>Streaming paused</span> : null}
+              {status === 'error' ? <span className="text-red-400">Error generating story</span> : null}
             </div>
-            <div className="whitespace-pre-wrap font-medium">
-              {text}
-              {status === 'streaming' ? <span className="animate-blink text-bloom-gold">|</span> : null}
-            </div>
+            {status === 'error' && errorMessage ? (
+              <div className="rounded-md bg-red-500/10 p-4 text-sm text-red-300">
+                <p className="font-semibold mb-1">Generation failed:</p>
+                <p>{errorMessage}</p>
+              </div>
+            ) : (
+              <div className="whitespace-pre-wrap font-medium">
+                {text}
+                {status === 'streaming' ? <span className="animate-blink text-bloom-gold">|</span> : null}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
