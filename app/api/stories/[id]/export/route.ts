@@ -65,8 +65,9 @@ function getStoryPages(story: Awaited<ReturnType<typeof getStoryById>>) {
   return story.bookPages?.length ? story.bookPages : splitStoryContent(story.content);
 }
 
-async function fetchImageBytes(imageUrl: string) {
-  const response = await fetch(imageUrl, { cache: 'no-store' });
+async function fetchImageBytes(imageUrl: string, baseUrl: string) {
+  const resolvedUrl = new URL(imageUrl, baseUrl).toString();
+  const response = await fetch(resolvedUrl, { cache: 'no-store' });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch illustration: ${response.status}`);
@@ -87,8 +88,8 @@ function fitIntoBox(sourceWidth: number, sourceHeight: number, maxWidth: number,
   };
 }
 
-async function embedPdfImage(pdfDoc: PDFDocument, imageUrl: string) {
-  const { bytes, contentType } = await fetchImageBytes(imageUrl);
+async function embedPdfImage(pdfDoc: PDFDocument, imageUrl: string, baseUrl: string) {
+  const { bytes, contentType } = await fetchImageBytes(imageUrl, baseUrl);
 
   if (contentType.includes('png')) {
     return pdfDoc.embedPng(bytes);
@@ -97,7 +98,11 @@ async function embedPdfImage(pdfDoc: PDFDocument, imageUrl: string) {
   return pdfDoc.embedJpg(bytes);
 }
 
-async function exportPdf(story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>, authorName: string) {
+async function exportPdf(
+  story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>,
+  authorName: string,
+  baseUrl: string,
+) {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -111,7 +116,7 @@ async function exportPdf(story: NonNullable<Awaited<ReturnType<typeof getStoryBy
 
   if (story.coverImageUrl) {
     try {
-      const coverImage = await embedPdfImage(pdfDoc, story.coverImageUrl);
+      const coverImage = await embedPdfImage(pdfDoc, story.coverImageUrl, baseUrl);
       const coverFit = fitIntoBox(coverImage.width, coverImage.height, pageWidth - 80, 520);
       coverPage.drawImage(coverImage, {
         x: (pageWidth - coverFit.width) / 2,
@@ -176,7 +181,7 @@ async function exportPdf(story: NonNullable<Awaited<ReturnType<typeof getStoryBy
 
     if (pageDraft.imageUrl) {
       try {
-        const illustration = await embedPdfImage(pdfDoc, pageDraft.imageUrl);
+        const illustration = await embedPdfImage(pdfDoc, pageDraft.imageUrl, baseUrl);
         const illustrationFit = fitIntoBox(illustration.width, illustration.height, pageWidth - 96, 320);
         page.drawImage(illustration, {
           x: (pageWidth - illustrationFit.width) / 2,
@@ -223,9 +228,13 @@ async function exportPdf(story: NonNullable<Awaited<ReturnType<typeof getStoryBy
   return pdfDoc.save();
 }
 
-async function exportDocx(story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>, authorName: string) {
+async function exportDocx(
+  story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>,
+  authorName: string,
+  baseUrl: string,
+) {
   const pages = getStoryPages(story);
-  const coverImageData = story.coverImageUrl ? await fetchImageBytes(story.coverImageUrl).catch(() => null) : null;
+  const coverImageData = story.coverImageUrl ? await fetchImageBytes(story.coverImageUrl, baseUrl).catch(() => null) : null;
   const children: Paragraph[] = [];
 
   children.push(
@@ -266,7 +275,7 @@ async function exportDocx(story: NonNullable<Awaited<ReturnType<typeof getStoryB
 
   for (let index = 0; index < pages.length; index += 1) {
     const pageDraft = pages[index];
-    const pageImageData = pageDraft.imageUrl ? await fetchImageBytes(pageDraft.imageUrl).catch(() => null) : null;
+    const pageImageData = pageDraft.imageUrl ? await fetchImageBytes(pageDraft.imageUrl, baseUrl).catch(() => null) : null;
 
     children.push(
       new Paragraph({
@@ -334,6 +343,7 @@ export async function GET(request: Request, { params }: StoryExportRouteContext)
   }
 
   try {
+    const baseUrl = new URL(request.url).origin;
     const story = await getStoryById(params.id, userId);
 
     if (!story || story.userId !== userId) {
@@ -341,7 +351,7 @@ export async function GET(request: Request, { params }: StoryExportRouteContext)
     }
 
     if (format === 'docx') {
-      const fileBuffer = await exportDocx(story, getAuthorName(user));
+      const fileBuffer = await exportDocx(story, getAuthorName(user), baseUrl);
       return new Response(fileBuffer, {
         status: 200,
         headers: {
@@ -351,7 +361,7 @@ export async function GET(request: Request, { params }: StoryExportRouteContext)
       });
     }
 
-    const fileBytes = await exportPdf(story, getAuthorName(user));
+    const fileBytes = await exportPdf(story, getAuthorName(user), baseUrl);
     return new Response(fileBytes, {
       status: 200,
       headers: {
