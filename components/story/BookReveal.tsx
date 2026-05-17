@@ -43,7 +43,8 @@ export function BookReveal({ draft, savedStoryId, coverImageUrl, authorName, onC
               src={coverImageUrl}
               alt={`Cover illustration for ${draft.title}`}
               className="h-auto w-full object-cover"
-              placeholderClassName="flex h-[320px] w-full items-center justify-center bg-bloom-cream/80 text-sm text-slate-500"
+              placeholderClassName="hidden"
+              loading="eager"
             />
             <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-gradient-to-b from-slate-950/55 via-transparent to-slate-950/70 p-5 text-white">
               <div className="rounded-2xl bg-slate-950/20 px-4 py-3 backdrop-blur-[2px]">

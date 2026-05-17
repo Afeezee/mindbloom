@@ -1,7 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { currentUser } from '@clerk/nextjs/server';
 import { AlignmentType, Document, ImageRun, Packer, Paragraph, PageBreak, TextRun } from 'docx';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { clerkSetupMessage, isClerkConfigured } from '@/lib/clerk-server';
 import { isSupabaseConfigured, supabaseSetupMessage } from '@/lib/service-config';
 import { getStoryById } from '@/lib/supabase';
@@ -13,36 +12,19 @@ interface StoryExportRouteContext {
   };
 }
 
-function splitLines(text: string, maxCharsPerLine: number) {
-  const words = text.split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-  let current = '';
-
-  for (const word of words) {
-    const candidate = current.length > 0 ? `${current} ${word}` : word;
-
-    if (candidate.length > maxCharsPerLine) {
-      if (current.length > 0) {
-        lines.push(current);
-      }
-
-      current = word;
-    } else {
-      current = candidate;
-    }
-  }
-
-  if (current.length > 0) {
-    lines.push(current);
-  }
-
-  return lines;
-}
-
 function getAuthorName(user: Awaited<ReturnType<typeof currentUser>>) {
   const combinedName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
 
   return user?.fullName?.trim() || combinedName || 'the writer';
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function splitStoryContent(content: string) {
@@ -79,153 +61,125 @@ async function fetchImageBytes(imageUrl: string, baseUrl: string) {
   };
 }
 
-function fitIntoBox(sourceWidth: number, sourceHeight: number, maxWidth: number, maxHeight: number) {
-  const scale = Math.min(maxWidth / sourceWidth, maxHeight / sourceHeight);
-
-  return {
-    width: sourceWidth * scale,
-    height: sourceHeight * scale,
-  };
-}
-
-async function embedPdfImage(pdfDoc: PDFDocument, imageUrl: string, baseUrl: string) {
-  const { bytes, contentType } = await fetchImageBytes(imageUrl, baseUrl);
-
-  if (contentType.includes('png')) {
-    return pdfDoc.embedPng(bytes);
-  }
-
-  return pdfDoc.embedJpg(bytes);
-}
-
-async function exportPdf(
-  story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>,
-  authorName: string,
-  baseUrl: string,
-) {
-  const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+function buildPrintableHtml(story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>, authorName: string, baseUrl: string) {
   const pages = getStoryPages(story);
-  const pageSize: [number, number] = [612, 792];
-  const pageWidth = pageSize[0];
-  const pageHeight = pageSize[1];
+  const summary = story.content.split(/\n{2,}/).filter(Boolean)[0] ?? story.content.slice(0, 220);
 
-  const coverPage = pdfDoc.addPage(pageSize);
-  coverPage.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(0.98, 0.96, 0.9) });
+  const pageSections = pages
+    .map((pageDraft) => {
+      const pageImage = pageDraft.imageUrl ? new URL(pageDraft.imageUrl, baseUrl).toString() : '';
+      return `
+        <section class="sheet">
+          <div class="page-label">Page ${pageDraft.pageNumber}</div>
+          ${pageImage ? `<img class="page-art" src="${escapeHtml(pageImage)}" alt="Illustration for page ${pageDraft.pageNumber}" />` : ''}
+          <div class="page-text">${escapeHtml(pageDraft.text).replace(/\n/g, '<br />')}</div>
+        </section>
+      `;
+    })
+    .join('');
 
-  if (story.coverImageUrl) {
-    try {
-      const coverImage = await embedPdfImage(pdfDoc, story.coverImageUrl, baseUrl);
-      const coverFit = fitIntoBox(coverImage.width, coverImage.height, pageWidth - 80, 520);
-      coverPage.drawImage(coverImage, {
-        x: (pageWidth - coverFit.width) / 2,
-        y: 200,
-        width: coverFit.width,
-        height: coverFit.height,
-      });
-    } catch {
-      // Fall back to text-only cover if the illustration cannot be embedded.
-    }
-  }
+  const coverImage = story.coverImageUrl ? new URL(story.coverImageUrl, baseUrl).toString() : '';
 
-  coverPage.drawRectangle({
-    x: 32,
-    y: 44,
-    width: pageWidth - 64,
-    height: 134,
-    color: rgb(0.11, 0.08, 0.17),
-    opacity: 0.78,
-  });
-
-  coverPage.drawText(story.title, {
-    x: 52,
-    y: 136,
-    size: 28,
-    font: fontBold,
-    color: rgb(1, 1, 1),
-    maxWidth: pageWidth - 104,
-  });
-
-  coverPage.drawText(`by ${authorName}`, {
-    x: 52,
-    y: 108,
-    size: 16,
-    font,
-    color: rgb(0.96, 0.95, 0.92),
-    maxWidth: pageWidth - 104,
-  });
-
-  if (story.summary) {
-    coverPage.drawText(story.summary, {
-      x: 52,
-      y: 84,
-      size: 12,
-      font,
-      color: rgb(0.96, 0.95, 0.92),
-      maxWidth: pageWidth - 104,
-    });
-  }
-
-  for (const pageDraft of pages) {
-    const page = pdfDoc.addPage(pageSize);
-    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(1, 1, 1) });
-
-    page.drawText(`Page ${pageDraft.pageNumber}`, {
-      x: 48,
-      y: 748,
-      size: 14,
-      font: fontBold,
-      color: rgb(0.2, 0.15, 0.3),
-    });
-
-    if (pageDraft.imageUrl) {
-      try {
-        const illustration = await embedPdfImage(pdfDoc, pageDraft.imageUrl, baseUrl);
-        const illustrationFit = fitIntoBox(illustration.width, illustration.height, pageWidth - 96, 320);
-        page.drawImage(illustration, {
-          x: (pageWidth - illustrationFit.width) / 2,
-          y: 392,
-          width: illustrationFit.width,
-          height: illustrationFit.height,
+  return `<!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>${escapeHtml(story.title)} | Print Preview</title>
+      <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Georgia, 'Times New Roman', serif; background: #f3efe4; color: #20162f; }
+        .book { max-width: 920px; margin: 0 auto; padding: 24px; }
+        .sheet {
+          page-break-after: always;
+          break-after: page;
+          min-height: 1120px;
+          background: #fffdf8;
+          border: 1px solid rgba(86, 64, 140, 0.15);
+          border-radius: 28px;
+          overflow: hidden;
+          margin-bottom: 24px;
+          box-shadow: 0 18px 40px rgba(31, 18, 58, 0.08);
+        }
+        .cover {
+          position: relative;
+          min-height: 1120px;
+          background: linear-gradient(180deg, #f7f1dd 0%, #fffdf8 56%, #efe9ff 100%);
+        }
+        .cover-art { width: 100%; height: 70%; object-fit: cover; display: block; }
+        .cover-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 36px;
+          background: linear-gradient(180deg, rgba(15, 12, 25, 0.48), rgba(15, 12, 25, 0.08) 34%, rgba(15, 12, 25, 0.58) 100%);
+          color: #fff;
+        }
+        .cover-kicker { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; opacity: 0.82; }
+        .cover-title {
+          margin: 0;
+          font-size: 56px;
+          line-height: 0.98;
+          font-weight: 900;
+          max-width: 760px;
+          text-wrap: balance;
+        }
+        .cover-byline { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.08em; opacity: 0.92; }
+        .cover-summary {
+          margin: 14px 0 0;
+          max-width: 680px;
+          font-size: 18px;
+          line-height: 1.7;
+          color: rgba(255, 255, 255, 0.9);
+        }
+        .cover-footer {
+          align-self: flex-end;
+          max-width: 70%;
+          padding: 18px 22px;
+          border-radius: 22px;
+          background: rgba(255, 255, 255, 0.16);
+          backdrop-filter: blur(4px);
+        }
+        .page-label { padding: 28px 30px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.24em; color: #7b679d; }
+        .page-art { width: calc(100% - 60px); margin: 18px 30px 0; max-height: 440px; object-fit: cover; border-radius: 24px; display: block; }
+        .page-text { padding: 24px 34px 38px; font-size: 21px; line-height: 1.75; white-space: normal; }
+        @media print {
+          body { background: #fff; }
+          .book { max-width: none; padding: 0; }
+          .sheet { margin: 0; border: none; border-radius: 0; box-shadow: none; }
+        }
+      </style>
+      <script>
+        window.addEventListener('load', () => {
+          const status = document.getElementById('print-status');
+          if (status) {
+            status.textContent = 'Ready to print or save as PDF.';
+          }
         });
-      } catch {
-        page.drawRectangle({ x: 48, y: 388, width: pageWidth - 96, height: 324, color: rgb(0.97, 0.95, 0.9) });
-      }
-    }
-
-    const textTop = 356;
-    let y = textTop;
-    const paragraphs = pageDraft.text.split(/\n{2,}/).filter(Boolean);
-
-    for (const paragraph of paragraphs) {
-      const lines = splitLines(paragraph, 74);
-
-      for (const line of lines) {
-        page.drawText(line, {
-          x: 52,
-          y,
-          size: 12,
-          font,
-          color: rgb(0.13, 0.1, 0.18),
-          maxWidth: pageWidth - 104,
-        });
-
-        y -= 18;
-      }
-
-      y -= 10;
-    }
-
-    page.drawText(pageDraft.text.length > 0 ? '' : ' ', {
-      x: 52,
-      y: textTop,
-      size: 12,
-      font,
-    });
-  }
-
-  return pdfDoc.save();
+      </script>
+    </head>
+    <body>
+      <main class="book">
+        <section class="sheet cover">
+          ${coverImage ? `<img class="cover-art" src="${escapeHtml(coverImage)}" alt="Cover illustration for ${escapeHtml(story.title)}" />` : ''}
+          <div class="cover-overlay">
+            <div>
+              <div class="cover-kicker">Cover Illustration</div>
+              <h1 class="cover-title">${escapeHtml(story.title)}</h1>
+              <p class="cover-byline">by ${escapeHtml(authorName)}</p>
+            </div>
+            <div class="cover-footer">
+              <p class="cover-summary">${escapeHtml(summary)}</p>
+            </div>
+          </div>
+        </section>
+        ${pageSections}
+      </main>
+      <p id="print-status" style="position: fixed; left: 16px; bottom: 16px; margin: 0; padding: 10px 14px; border-radius: 999px; background: rgba(32, 22, 47, 0.9); color: white; font: 14px/1.4 system-ui, sans-serif;">Open this page in a browser tab, then print or save as PDF.</p>
+    </body>
+  </html>`;
 }
 
 async function exportDocx(
@@ -361,15 +315,16 @@ export async function GET(request: Request, { params }: StoryExportRouteContext)
       });
     }
 
-    const fileBytes = await exportPdf(story, getAuthorName(user), baseUrl);
-    return new Response(fileBytes, {
+    const html = buildPrintableHtml(story, getAuthorName(user), baseUrl);
+    return new Response(html, {
       status: 200,
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${story.title.replace(/[^a-z0-9_-]/gi, '_')}.pdf"`,
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="${story.title.replace(/[^a-z0-9_-]/gi, '_')}.html"`,
       },
     });
   } catch (error) {
+    console.error('Story export failed:', error);
     return Response.json(
       {
         error: error instanceof Error ? error.message : 'Unexpected story export error.',

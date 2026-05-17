@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { IllustrationImage } from '@/components/story/IllustrationImage';
+import { PdfExportModal } from '@/components/story/PdfExportModal';
 import { type Story, type StoryPageDraft } from '@/lib/types';
 import { getAgeGroupLabel, getLearningFocusLabel, getBookSizeLabel } from '@/lib/utils';
 
@@ -28,24 +29,38 @@ export function StoryStudio({ story }: StoryStudioProps) {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [isPreparingPdfPreview, setIsPreparingPdfPreview] = useState(false);
 
-  async function downloadExport(format: 'pdf') {
+  function closePdfPreview() {
+    if (pdfPreviewUrl) {
+      URL.revokeObjectURL(pdfPreviewUrl);
+    }
+
+    setPdfPreviewUrl(null);
+    setIsPreparingPdfPreview(false);
+  }
+
+  async function handlePdfPreview() {
     try {
-      const response = await fetch(`/api/stories/${story.id}/export?format=${format}`);
+      setIsPreparingPdfPreview(true);
+      const response = await fetch(`/api/stories/${story.id}/export?format=pdf`);
 
       if (!response.ok) {
-        throw new Error(`Unable to export ${format.toUpperCase()} right now.`);
+        throw new Error('Unable to prepare the PDF preview right now.');
       }
 
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = objectUrl;
-      link.download = `${story.title.replace(/[^a-z0-9_-]/gi, '_')}.${format}`;
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+      if (pdfPreviewUrl) {
+        URL.revokeObjectURL(pdfPreviewUrl);
+      }
+
+      setPdfPreviewUrl(objectUrl);
     } catch (error) {
       setSaveMessage(error instanceof Error ? error.message : 'Unable to export the story.');
+      setIsPreparingPdfPreview(false);
     }
   }
 
@@ -123,9 +138,9 @@ export function StoryStudio({ story }: StoryStudioProps) {
               Preview
             </Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={() => downloadExport('pdf')}>
+          <Button variant="outline" size="sm" onClick={handlePdfPreview} disabled={isPreparingPdfPreview}>
             <Download className="h-4 w-4" />
-            Export
+            {isPreparingPdfPreview ? 'Preparing…' : 'Export'}
           </Button>
           <Link href={`/stories/new`}>
             <Button variant="outline" size="sm">
@@ -221,7 +236,8 @@ export function StoryStudio({ story }: StoryStudioProps) {
                         src={story.coverImageUrl}
                         alt="Cover"
                         className="h-auto w-full object-cover"
-                        placeholderClassName="flex h-[280px] items-center justify-center bg-slate-100 text-sm text-slate-500"
+                        placeholderClassName="hidden"
+                        loading="eager"
                       />
                     </div>
                   ) : (
@@ -277,6 +293,8 @@ export function StoryStudio({ story }: StoryStudioProps) {
           ) : null}
         </main>
       </div>
+
+      <PdfExportModal open={Boolean(pdfPreviewUrl)} title={story.title} pdfUrl={pdfPreviewUrl} onClose={closePdfPreview} />
     </div>
   );
 }

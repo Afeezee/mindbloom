@@ -6,6 +6,7 @@ import { Heart, Share2, ArrowLeft, ChevronLeft, ChevronRight, Volume2, Square, F
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { IllustrationImage } from '@/components/story/IllustrationImage';
+import { PdfExportModal } from '@/components/story/PdfExportModal';
 import { type Story, type StoryPageDraft } from '@/lib/types';
 import { formatDate, getAgeGroupLabel, getBookSizeLabel, getLearningFocusLabel } from '@/lib/utils';
 
@@ -25,6 +26,8 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
   const [isPreparingViewer, setIsPreparingViewer] = useState(true);
   const [readyProgress, setReadyProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
   const [isNarrating, setIsNarrating] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [isPreparingPdfPreview, setIsPreparingPdfPreview] = useState(false);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const pages = useMemo<StoryPageDraft[]>(() => {
     if (story.bookPages?.length) {
@@ -53,23 +56,35 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
   const isLastPage = currentPage >= pages.length - 1;
   const pageNarrationText = `${story.title}. Page ${currentPageDraft.pageNumber}. ${currentPageDraft.text}`;
 
-  async function downloadExport(format: 'pdf' | 'docx') {
+  function closePdfPreview() {
+    if (pdfPreviewUrl) {
+      URL.revokeObjectURL(pdfPreviewUrl);
+    }
+
+    setPdfPreviewUrl(null);
+    setIsPreparingPdfPreview(false);
+  }
+
+  async function handlePdfPreview() {
     try {
-      const response = await fetch(`/api/stories/${story.id}/export?format=${format}`);
+      setIsPreparingPdfPreview(true);
+      const response = await fetch(`/api/stories/${story.id}/export?format=pdf`);
 
       if (!response.ok) {
-        throw new Error(`Unable to export ${format.toUpperCase()} right now.`);
+        throw new Error('Unable to prepare the PDF preview right now.');
       }
 
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = objectUrl;
-      link.download = `${story.title.replace(/[^a-z0-9_-]/gi, '_')}.${format}`;
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+      if (pdfPreviewUrl) {
+        URL.revokeObjectURL(pdfPreviewUrl);
+      }
+
+      setPdfPreviewUrl(objectUrl);
     } catch (error) {
       setShareMessage(error instanceof Error ? error.message : 'Unable to export the story.');
+      setIsPreparingPdfPreview(false);
     }
   }
 
@@ -77,7 +92,7 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
     let cancelled = false;
 
     async function preloadMedia() {
-      const mediaSources = [coverImage, ...pages.map((page) => page.imageUrl)].filter((value): value is string => Boolean(value));
+      const mediaSources = [coverImage, currentPageDraft.imageUrl].filter((value): value is string => Boolean(value));
 
       if (mediaSources.length === 0) {
         setIsPreparingViewer(false);
@@ -105,6 +120,7 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
 
       if (!cancelled) {
         setIsPreparingViewer(false);
+        setReadyProgress({ done: mediaSources.length, total: mediaSources.length });
       }
     }
 
@@ -118,7 +134,7 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
     return () => {
       cancelled = true;
     };
-  }, [coverImage, pages]);
+  }, [coverImage, currentPageDraft.imageUrl]);
 
   useEffect(() => {
     return () => {
@@ -221,7 +237,7 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
       <article className="min-h-[100dvh] w-full bg-slate-950 px-6 py-10 text-white">
         <div className="mx-auto flex max-w-3xl flex-col items-center justify-center rounded-3xl border border-white/15 bg-white/5 p-10 text-center">
           <p className="text-sm uppercase tracking-[0.2em] text-white/70">Preparing Story Viewer</p>
-          <h1 className="mt-3 text-3xl font-semibold">Loading text and illustrations...</h1>
+          <h1 className="mt-3 text-3xl font-semibold">Loading illustrations and text...</h1>
           <p className="mt-3 text-white/75">
             {readyProgress.total > 0 ? `Loaded ${readyProgress.done} of ${readyProgress.total} media assets.` : 'Preparing your immersive book experience.'}
           </p>
@@ -266,7 +282,8 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
                 src={coverImage}
                 alt={`Cover illustration for ${story.title}`}
                 className="h-auto w-full rounded-2xl border border-white/20 object-cover"
-                placeholderClassName="flex h-[280px] w-full items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-sm text-white/80"
+                placeholderClassName="hidden"
+                loading="eager"
               />
             </div>
           ) : null}
@@ -294,11 +311,32 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
                 {isNarrating ? <Square className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 {isNarrating ? 'Stop narration' : 'Narrate page'}
               </Button>
-              <Button variant="outline" onClick={() => downloadExport('pdf')}>
+              <Button variant="outline" onClick={handlePdfPreview} disabled={isPreparingPdfPreview}>
                 <FileDown className="h-4 w-4" />
-                Export PDF
+                {isPreparingPdfPreview ? 'Preparing PDF…' : 'Preview PDF'}
               </Button>
-              <Button variant="outline" onClick={() => downloadExport('docx')}>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`/api/stories/${story.id}/export?format=docx`);
+
+                    if (!response.ok) {
+                      throw new Error('Unable to export DOCX right now.');
+                    }
+
+                    const blob = await response.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = objectUrl;
+                    link.download = `${story.title.replace(/[^a-z0-9_-]/gi, '_')}.docx`;
+                    link.click();
+                    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+                  } catch (error) {
+                    setShareMessage(error instanceof Error ? error.message : 'Unable to export the story.');
+                  }
+                }}
+              >
                 <FileText className="h-4 w-4" />
                 Export DOCX
               </Button>
@@ -333,6 +371,7 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
                   alt={`Illustration for page ${currentPageDraft.pageNumber}`}
                   className="mb-5 h-auto w-full rounded-2xl border border-bloom-plum/10 object-cover"
                   placeholderClassName="mb-5 flex h-[280px] w-full items-center justify-center rounded-2xl border border-bloom-plum/10 bg-bloom-cream/60 text-sm text-slate-600"
+                  loading="eager"
                 />
               ) : null}
               <p className="whitespace-pre-wrap text-pretty leading-8 text-bloom-ink">{currentPageDraft.text}</p>
@@ -348,6 +387,7 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
             ) : null}
           </div>
         </div>
+        <PdfExportModal open={Boolean(pdfPreviewUrl)} title={story.title} pdfUrl={pdfPreviewUrl} onClose={closePdfPreview} />
       </div>
     </article>
   );
