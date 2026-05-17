@@ -29,6 +29,26 @@ export function StoryStudio({ story }: StoryStudioProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  async function downloadExport(format: 'pdf') {
+    try {
+      const response = await fetch(`/api/stories/${story.id}/export?format=${format}`);
+
+      if (!response.ok) {
+        throw new Error(`Unable to export ${format.toUpperCase()} right now.`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `${story.title.replace(/[^a-z0-9_-]/gi, '_')}.${format}`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : 'Unable to export the story.');
+    }
+  }
+
   const pages: StoryPageDraft[] = story.bookPages?.length
     ? story.bookPages
     : story.content
@@ -103,12 +123,10 @@ export function StoryStudio({ story }: StoryStudioProps) {
               Preview
             </Button>
           </Link>
-          <Link href={`/api/stories/${story.id}/export?format=pdf`}>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4" />
-              Export
-            </Button>
-          </Link>
+          <Button variant="outline" size="sm" onClick={() => downloadExport('pdf')}>
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
           <Link href={`/stories/new`}>
             <Button variant="outline" size="sm">
               <RefreshCw className="h-4 w-4" />

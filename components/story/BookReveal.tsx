@@ -11,6 +11,7 @@ interface BookRevealProps {
   draft: BookDraft;
   savedStoryId: string;
   coverImageUrl: string;
+  authorName: string;
   onCreateAnother: () => void;
 }
 
@@ -22,7 +23,7 @@ const STAT_ICONS: Record<string, React.ReactNode> = {
   size: <Ruler className="h-6 w-6" />,
 };
 
-export function BookReveal({ draft, savedStoryId, coverImageUrl, onCreateAnother }: BookRevealProps) {
+export function BookReveal({ draft, savedStoryId, coverImageUrl, authorName, onCreateAnother }: BookRevealProps) {
   return (
     <div className="section-shell py-10">
       <div className="mx-auto max-w-3xl">
@@ -37,13 +38,22 @@ export function BookReveal({ draft, savedStoryId, coverImageUrl, onCreateAnother
 
         {/* Cover art */}
         <div className="flex flex-col items-center">
-          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-bloom-plum/15 shadow-bloom">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-bloom-plum/15 shadow-bloom">
             <IllustrationImage
               src={coverImageUrl}
               alt={`Cover illustration for ${draft.title}`}
               className="h-auto w-full object-cover"
               placeholderClassName="flex h-[320px] w-full items-center justify-center bg-bloom-cream/80 text-sm text-slate-500"
             />
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-between bg-gradient-to-b from-slate-950/55 via-transparent to-slate-950/70 p-5 text-white">
+              <div className="rounded-2xl bg-slate-950/20 px-4 py-3 backdrop-blur-[2px]">
+                <p className="text-xs uppercase tracking-[0.28em] text-white/75">Cover Illustration</p>
+              </div>
+              <div className="space-y-2 rounded-3xl bg-slate-950/25 px-4 py-5 text-center backdrop-blur-[2px]">
+                <h2 className="text-2xl font-black leading-tight sm:text-3xl">{draft.title}</h2>
+                <p className="text-sm font-semibold tracking-[0.12em] text-white/85">by {authorName}</p>
+              </div>
+            </div>
           </div>
 
           <h2 className="mt-6 text-center text-3xl font-semibold text-bloom-ink">{draft.title}</h2>

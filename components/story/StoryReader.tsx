@@ -53,6 +53,26 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
   const isLastPage = currentPage >= pages.length - 1;
   const pageNarrationText = `${story.title}. Page ${currentPageDraft.pageNumber}. ${currentPageDraft.text}`;
 
+  async function downloadExport(format: 'pdf' | 'docx') {
+    try {
+      const response = await fetch(`/api/stories/${story.id}/export?format=${format}`);
+
+      if (!response.ok) {
+        throw new Error(`Unable to export ${format.toUpperCase()} right now.`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `${story.title.replace(/[^a-z0-9_-]/gi, '_')}.${format}`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      setShareMessage(error instanceof Error ? error.message : 'Unable to export the story.');
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -274,18 +294,14 @@ export function StoryReader({ story, canLike = true, backHref = '/stories', publ
                 {isNarrating ? <Square className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 {isNarrating ? 'Stop narration' : 'Narrate page'}
               </Button>
-              <Link href={`/api/stories/${story.id}/export?format=pdf`}>
-                <Button variant="outline">
-                  <FileDown className="h-4 w-4" />
-                  Export PDF
-                </Button>
-              </Link>
-              <Link href={`/api/stories/${story.id}/export?format=docx`}>
-                <Button variant="outline">
-                  <FileText className="h-4 w-4" />
-                  Export DOCX
-                </Button>
-              </Link>
+              <Button variant="outline" onClick={() => downloadExport('pdf')}>
+                <FileDown className="h-4 w-4" />
+                Export PDF
+              </Button>
+              <Button variant="outline" onClick={() => downloadExport('docx')}>
+                <FileText className="h-4 w-4" />
+                Export DOCX
+              </Button>
             </div>
           </div>
 

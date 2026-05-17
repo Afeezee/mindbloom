@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { StoryForm } from '@/components/story/StoryForm';
 import { MagicLoadingScreen } from '@/components/story/MagicLoadingScreen';
 import { StoryOutlinePreview } from '@/components/story/StoryOutlinePreview';
@@ -32,6 +33,29 @@ function buildIllustrationUrl(prompt: string, seed: number, model = 'flux') {
   return `/api/illustration?${search.toString()}`;
 }
 
+function buildAuthorName(firstName?: string | null, lastName?: string | null, fullName?: string | null) {
+  const combinedName = [firstName, lastName].filter(Boolean).join(' ').trim();
+
+  return fullName?.trim() || combinedName || 'the writer';
+}
+
+function buildCoverPrompt(title: string, authorName: string, coverImagePrompt: string, characterDescriptions: CharacterDescription[]) {
+  const characterSheet = characterDescriptions
+    .map((character) => `${character.name} (${character.appearance})`)
+    .join('; ');
+
+  return [
+    `Create a polished children's book cover illustration for "${title.trim()}" by ${authorName}.`,
+    'Show the main character or characters against the backdrop and setting described in the story.',
+    characterSheet.length > 0 ? `Character details: ${characterSheet}.` : null,
+    `Scene guidance: ${coverImagePrompt.trim()}.`,
+    `Include the title text "${title.trim()}" in large bold lettering at the top of the cover and "by ${authorName}" beneath it.`,
+    'Portrait composition, vibrant colors, clean readable book-cover layout, warm children's-book style, no extra captions.',
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(' ');
+}
+
 function preloadImage(url: string) {
   return new Promise<void>((resolve) => {
     const img = new Image();
@@ -42,6 +66,7 @@ function preloadImage(url: string) {
 }
 
 export default function NewStoryPage() {
+  const { user } = useUser();
   const [step, setStep] = useState<CreationStep>('form');
   const [input, setInput] = useState<StoryBuilderInput | null>(null);
   const [outline, setOutline] = useState<StoryOutline | null>(null);
@@ -99,6 +124,7 @@ export default function NewStoryPage() {
       }
 
       const payload = (await response.json()) as { draft: BookDraft };
+      const authorName = buildAuthorName(user?.firstName, user?.lastName, user?.fullName);
 
       const hydratedDraft: BookDraft = {
         ...payload.draft,
@@ -108,7 +134,10 @@ export default function NewStoryPage() {
         })),
       };
 
-      const coverUrl = buildIllustrationUrl(hydratedDraft.coverImagePrompt, 0);
+      const coverUrl = buildIllustrationUrl(
+        buildCoverPrompt(hydratedDraft.title, authorName, hydratedDraft.coverImagePrompt, outline.characters),
+        0,
+      );
       setCoverImageUrl(coverUrl);
 
       await Promise.all([
@@ -181,6 +210,7 @@ export default function NewStoryPage() {
         draft={draft}
         savedStoryId={savedStoryId}
         coverImageUrl={coverImageUrl}
+        authorName={buildAuthorName(user?.firstName, user?.lastName, user?.fullName)}
         onCreateAnother={handleCreateAnother}
       />
     );
