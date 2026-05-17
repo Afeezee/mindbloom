@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useMemo, useState } from 'react';
 
 interface IllustrationImageProps {
@@ -65,6 +67,7 @@ export function IllustrationImage({
           {status === 'error' ? 'Illustration unavailable right now.' : 'Loading illustration...'}
         </div>
       ) : null}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={resolvedSource}
         alt={alt}

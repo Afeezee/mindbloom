@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { Globe, Lock, Eye, Download, RefreshCw, Save, X } from 'lucide-react';

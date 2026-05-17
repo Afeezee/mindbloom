@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { Search, TrendingUp, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -24,8 +25,8 @@ async function DiscoverGrid({ searchParams }: DiscoverPageProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20 text-center text-slate-500">
         <BookOpen className="h-12 w-12 text-bloom-plum/30" />
-        <p className="text-lg font-medium">No stories found.</p>
-        <p className="text-sm">Be the first to publish one!</p>
+        <p className="text-lg font-medium">No stories match that search yet.</p>
+        <p className="text-sm">Try a different keyword or explore the latest stories.</p>
       </div>
     );
   }
@@ -48,6 +49,7 @@ function PublicStoryCard({ story }: { story: Story }) {
       {/* Cover image */}
       {story.coverImageUrl ? (
         <div className="overflow-hidden rounded-2xl">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={story.coverImageUrl}
             alt={story.title}
@@ -76,7 +78,7 @@ function PublicStoryCard({ story }: { story: Story }) {
       </div>
 
       <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-bloom-plum transition group-hover:gap-2.5">
-        Read story <ArrowRight className="h-4 w-4" />
+        Open story <ArrowRight className="h-4 w-4" />
       </span>
     </Link>
   );
@@ -101,7 +103,7 @@ export default function DiscoverPage({ searchParams }: DiscoverPageProps) {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-semibold text-bloom-ink">Discover Stories</h1>
-        <p className="mt-2 text-base leading-7 text-slate-600">Explore children&rsquo;s books published by the MindBloom community.</p>
+        <p className="mt-2 text-base leading-7 text-slate-600">Browse warm, family-friendly stories shared by the MindBloom community.</p>
       </div>
 
       {/* Search + tabs */}
@@ -112,7 +114,7 @@ export default function DiscoverPage({ searchParams }: DiscoverPageProps) {
           <input
             name="q"
             defaultValue={searchParams.q ?? ''}
-            placeholder="Search by title or story…"
+            placeholder="Search by title or keyword..."
             className="w-full bg-transparent text-sm text-bloom-ink placeholder:text-slate-400 focus:outline-none"
           />
           {searchParams.sort ? <input type="hidden" name="sort" value={searchParams.sort} /> : null}
@@ -125,7 +127,7 @@ export default function DiscoverPage({ searchParams }: DiscoverPageProps) {
             className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition ${currentSort === 'latest' ? 'bg-bloom-plum text-white' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             <Clock className="h-4 w-4" />
-            Latest
+            Newest
           </Link>
           <Link
             href={buildHref({ sort: 'top' })}
