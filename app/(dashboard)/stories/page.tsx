@@ -22,7 +22,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
   if (!isClerkConfigured) {
     return (
       <div className="section-shell py-8">
-        <ClerkSetupNotice title="Your story library is waiting on Clerk setup." />
+        <ClerkSetupNotice title="Your story shelf is almost ready." />
       </div>
     );
   }
@@ -32,7 +32,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
   if (!userId) {
     return (
       <div className="section-shell py-8">
-        <ClerkSetupNotice title="Sign in to view your story library." />
+        <ClerkSetupNotice title="Please sign in to see your stories." />
       </div>
     );
   }
@@ -68,11 +68,11 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
           <p className="text-sm uppercase tracking-[0.28em] text-bloom-teal">Your Collection</p>
           <h1 className="mt-2 text-4xl font-semibold text-bloom-ink">Your Story Shelf</h1>
           <p className="mt-3 text-base leading-7 text-slate-600">
-            {stories.length} {stories.length === 1 ? 'magical tale' : 'magical tales'} waiting to be shared.
+            {stories.length} {stories.length === 1 ? 'story' : 'stories'} ready for your next read-aloud.
           </p>
         </div>
         <Link href="/stories/new">
-          <Button size="lg">Create a New Story</Button>
+          <Button size="lg">Create New Story</Button>
         </Link>
       </div>
 
@@ -80,7 +80,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
         <CardContent className="flex flex-col gap-4 pt-6 md:flex-row md:items-end md:justify-between">
           <form className="grid flex-1 gap-4 md:grid-cols-2" method="GET">
             <label className="space-y-2 text-sm font-semibold text-bloom-ink">
-              Filter by theme
+              Pick a theme
               <Select
                 defaultValue={selectedTheme ?? 'all'}
                 name="theme"
@@ -91,7 +91,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
               />
             </label>
             <label className="space-y-2 text-sm font-semibold text-bloom-ink">
-              Filter by age group
+              Pick an age range
               <Select
                 defaultValue={selectedAgeGroup ?? 'all'}
                 name="ageGroup"
@@ -103,7 +103,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
             </label>
             <div className="md:col-span-2">
               <Button variant="secondary" type="submit">
-                Filter
+                Show Stories
               </Button>
             </div>
           </form>
@@ -116,9 +116,9 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
             <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-bloom-cream text-4xl">
               📚
             </div>
-            <h2 className="text-3xl font-semibold text-bloom-ink">Your shelf is empty</h2>
+            <h2 className="text-3xl font-semibold text-bloom-ink">Your shelf is empty for now</h2>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-600">
-              Every great story starts with a single idea. Create your first tale and begin building a collection your family will treasure.
+              Start with one fun idea and turn it into tonight&apos;s favorite bedtime story.
             </p>
             <div className="mt-8">
               <Link href="/stories/new">

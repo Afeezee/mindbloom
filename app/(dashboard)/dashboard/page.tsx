@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   if (!isClerkConfigured) {
     return (
       <div className="section-shell py-8">
-        <ClerkSetupNotice title="Dashboard stats are waiting on Clerk setup." />
+        <ClerkSetupNotice title="Your home screen is almost ready." />
       </div>
     );
   }
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   if (!userId) {
     return (
       <div className="section-shell py-8">
-        <ClerkSetupNotice title="Sign in to view your dashboard." />
+        <ClerkSetupNotice title="Please sign in to continue." />
       </div>
     );
   }
@@ -61,18 +61,18 @@ export default async function DashboardPage() {
   return (
     <div className="section-shell py-8">
       <section className="rounded-[2rem] bg-gradient-to-br from-bloom-plum via-[#7564d8] to-bloom-teal px-8 py-10 text-white shadow-bloom">
-        <p className="text-sm uppercase tracking-[0.28em] text-white/75">Your Library</p>
+        <p className="text-sm uppercase tracking-[0.28em] text-white/75">Your Story Home</p>
         <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <h1 className="text-4xl font-semibold md:text-5xl">Welcome back, {firstName}!</h1>
             <p className="mt-4 text-base leading-8 text-white/80">
-              Every story tells a new adventure. Keep filling your collection with tales your kids will cherish forever.
+              Your next great bedtime moment starts here. Keep creating stories your family loves to hear.
             </p>
           </div>
           <Link href="/stories/new">
             <Button className="bg-white text-bloom-plum hover:bg-bloom-cream" size="lg">
               <Sparkles className="h-5 w-5" />
-              Create a Story
+              Start a New Story
             </Button>
           </Link>
         </div>
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
       <section className="mt-8 grid gap-5 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Stories Created</CardTitle>
+            <CardTitle>Stories on Your Shelf</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <p className="text-4xl font-semibold text-bloom-ink">{stories.length}</p>
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>This Week's Magic</CardTitle>
+            <CardTitle>This Week&apos;s New Stories</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <p className="text-4xl font-semibold text-bloom-ink">{storiesThisWeek}</p>
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Your Favorite Theme</CardTitle>
+            <CardTitle>Your Go-To Theme</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <div>
@@ -114,8 +114,8 @@ export default async function DashboardPage() {
       <section className="mt-10">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-semibold text-bloom-ink">Your Latest Adventures</h2>
-            <p className="mt-2 text-sm text-slate-600">Your newest stories are here. Read them aloud, save favorites, or dive into creating more.</p>
+            <h2 className="text-3xl font-semibold text-bloom-ink">Fresh From Your Story Shelf</h2>
+            <p className="mt-2 text-sm text-slate-600">Jump back into your newest stories or spin up a brand-new one.</p>
           </div>
           <Link href="/stories" className="text-sm font-semibold text-bloom-plum">
             See all
@@ -125,9 +125,9 @@ export default async function DashboardPage() {
         {recentStories.length === 0 ? (
           <Card>
             <CardContent className="py-14 text-center">
-              <p className="text-2xl font-semibold text-bloom-ink">Your story shelf is waiting for its first page.</p>
+              <p className="text-2xl font-semibold text-bloom-ink">Your shelf is ready for its first story.</p>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Pick a character, choose a setting, and add something magical. That's all it takes to get started.
+                Pick a name, choose a setting, and press go. You&apos;ll have something magical to read tonight.
               </p>
               <div className="mt-6">
                 <Link href="/stories/new">

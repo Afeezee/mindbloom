@@ -23,8 +23,8 @@ export default function SignUpPage() {
       <main className="flex min-h-screen items-center justify-center px-4 py-10">
         <ClerkSetupNotice
           className="w-full"
-          title="Account creation is disabled until Clerk is configured."
-          description="MindBloom can only create accounts after you provide real Clerk API keys in .env.local and restart the server."
+          title="Creating accounts is temporarily unavailable."
+          description="We&apos;re wrapping up setup. Please check back shortly."
         />
       </main>
     );
@@ -37,7 +37,7 @@ export default function SignUpPage() {
           <div className="w-full max-w-md">
             <div className="mb-6 text-center">
               <p className="text-sm uppercase tracking-[0.28em] text-bloom-teal">Join MindBloom</p>
-              <h1 className="mt-2 text-3xl font-semibold text-bloom-ink">Create your account</h1>
+              <h1 className="mt-2 text-3xl font-semibold text-bloom-ink">Start your story journey</h1>
               <p className="mt-3 text-sm text-slate-600">
                 Already have an account?{' '}
                 <Link href={clerkSignInUrl} className="font-semibold text-bloom-plum">
@@ -57,13 +57,13 @@ export default function SignUpPage() {
         </section>
 
         <section className="order-1 bg-gradient-to-br from-bloom-gold via-[#ffc95f] to-bloom-coral p-10 text-bloom-ink lg:order-2">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-bloom-ink/70">A playful writing ritual</p>
-          <h2 className="mt-6 text-4xl font-semibold leading-tight">Give every bedtime a brighter beginning.</h2>
+          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-bloom-ink/70">A playful bedtime ritual</p>
+          <h2 className="mt-6 text-4xl font-semibold leading-tight">Make every night feel special.</h2>
           <p className="mt-5 max-w-md text-base leading-7 text-bloom-ink/80">
-            MindBloom helps families turn characters, settings, and wonder-filled prompts into stories that feel calm, warm, and easy to revisit.
+            Turn names, places, and little sparks of imagination into stories your kids will ask for again and again.
           </p>
           <div className="mt-10 rounded-[1.75rem] bg-white/45 p-5 text-sm leading-7 text-bloom-ink/75">
-            Streaming generation keeps the magic visible while the story grows, and your saved library stays ready for the next cozy read-aloud.
+            Build your own family shelf of stories and keep bedtime full of laughter, comfort, and wonder.
           </div>
         </section>
       </div>

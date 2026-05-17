@@ -23,8 +23,8 @@ export default function SignInPage() {
       <main className="flex min-h-screen items-center justify-center px-4 py-10">
         <ClerkSetupNotice
           className="w-full"
-          title="Sign-in is disabled until Clerk is configured."
-          description="The sign-in screen needs real Clerk API keys before it can render. Add them to .env.local, restart the server, and then return here."
+          title="Sign in is temporarily unavailable."
+          description="We&apos;re still finishing setup. Please check back in a moment."
         />
       </main>
     );
@@ -35,12 +35,12 @@ export default function SignInPage() {
       <div className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-bloom backdrop-blur lg:grid-cols-[1.1fr_0.9fr]">
         <section className="bg-gradient-to-br from-bloom-plum via-[#7767dc] to-bloom-teal p-10 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/75">MindBloom</p>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight">Return to your cozy story studio.</h1>
+          <h1 className="mt-6 text-4xl font-semibold leading-tight">Welcome back to story time.</h1>
           <p className="mt-5 max-w-md text-base leading-7 text-white/80">
-            Sign in to keep writing safe, magical, age-appropriate stories with Groq-powered streaming and your private story library.
+            Pick up where you left off, revisit favorites, and create a brand-new adventure in just a few taps.
           </p>
           <div className="mt-10 rounded-[1.75rem] bg-white/10 p-5 text-sm leading-7 text-white/80">
-            Tiny prompts become full adventures here. Pick a theme, choose an age band, and let MindBloom shape the rest.
+            Tonight&apos;s story can be silly, cozy, brave, or dreamy. You choose the vibe, we help you bring it to life.
           </div>
         </section>
 

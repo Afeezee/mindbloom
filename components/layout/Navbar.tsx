@@ -8,17 +8,17 @@ import { Badge } from '@/components/ui/badge';
 const navigationItems = [
   {
     href: '/dashboard',
-    label: 'Dashboard',
+    label: 'Story Home',
     icon: LayoutDashboard,
   },
   {
     href: '/stories',
-    label: 'My Stories',
+    label: 'My Story Shelf',
     icon: ScrollText,
   },
   {
     href: '/stories/new',
-    label: 'New Story',
+    label: 'Create Story',
     icon: PlusCircle,
   },
   {
@@ -62,7 +62,7 @@ export function Navbar({ isClerkConfigured }: NavbarProps) {
             <BloomIcon />
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-bloom-teal">MindBloom</p>
-              <p className="text-sm text-slate-600">Magical stories, instantly</p>
+              <p className="text-sm text-slate-600">Stories kids ask for again</p>
             </div>
           </Link>
           <div className="lg:hidden">{authControl}</div>

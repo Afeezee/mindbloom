@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { Compass, LayoutDashboard, Sparkles, Stars, ScrollText } from 'lucide-react';
 
 const items = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Story Home', icon: LayoutDashboard },
   { href: '/stories', label: 'Story Library', icon: ScrollText },
-  { href: '/stories/new', label: 'Write a Story', icon: Sparkles },
+  { href: '/stories/new', label: 'Create a Story', icon: Sparkles },
 ] as const;
 
 export function Sidebar() {
@@ -18,7 +18,7 @@ export function Sidebar() {
         </div>
         <h2 className="text-2xl font-semibold">Story Studio</h2>
         <p className="mt-2 text-sm leading-6 text-white/80">
-          Draft sweet adventures, save family favorites, and keep every story in one playful home.
+          Create sweet adventures, save family favorites, and keep every story in one happy place.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export function Sidebar() {
           MindBloom Tip
         </div>
         <p className="leading-6 text-slate-700">
-          Specific characters, cozy settings, and one surprising detail almost always lead to richer story generations.
+          A specific character, a cozy setting, and one fun twist often make the best stories.
         </p>
       </div>
     </aside>

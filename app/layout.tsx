@@ -23,7 +23,7 @@ const bodyFont = Nunito({
 
 export const metadata: Metadata = {
   title: 'MindBloom',
-  description: "MindBloom is an AI-powered children's story writing app built with Next.js, Clerk, Supabase, and Groq.",
+  description: 'MindBloom helps families create warm, personalized bedtime stories in minutes.',
 };
 
 export default function RootLayout({
