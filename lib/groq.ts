@@ -230,13 +230,6 @@ function extractJsonPayload(rawText: string): string {
   throw new Error('Groq did not return valid JSON.');
 }
 
-function normalizeCharacterDescriptions(parsedDraft: Partial<BookDraft & { characterDescriptions?: Record<string, string> }>): CharacterDescription[] {
-  if (Array.isArray((parsedDraft as { characters?: unknown }).characters)) {
-    return [];
-  }
-  return [];
-}
-
 function normalizeBookDraft(params: StoryGenerationParams, parsedDraft: Partial<BookDraft>, characterDescriptions: CharacterDescription[] = []): BookDraft {
   const pages = Array.isArray(parsedDraft.pages) ? parsedDraft.pages : [];
   const compactCharacterSheet = buildCompactCharacterSheet(characterDescriptions);

@@ -19,7 +19,7 @@ export default function HomePage() {
             </svg>
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-bloom-teal">MindBloom</p>
-              <p className="text-sm text-slate-600">Magical stories, instantly</p>
+              <p className="text-sm text-slate-600">Stories kids ask for again</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -40,19 +40,19 @@ export default function HomePage() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-bloom-plum/10 px-4 py-2 mb-6">
             <Sparkles className="h-4 w-4 text-bloom-plum" />
-            <span className="text-sm font-semibold text-bloom-plum">AI-powered storytelling</span>
+            <span className="text-sm font-semibold text-bloom-plum">Made for real bedtime moments</span>
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-bloom-ink leading-tight mb-6">
-            Bedtime stories, <span className="bg-gradient-to-r from-bloom-plum via-bloom-teal to-bloom-coral bg-clip-text text-transparent">instantly</span>
+            Turn tonight into <span className="bg-gradient-to-r from-bloom-plum via-bloom-teal to-bloom-coral bg-clip-text text-transparent">story night</span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-600 mb-8 leading-relaxed">
-            Say goodbye to bedtime battles. Create personalized, magical stories for your kids in seconds. Every story is safe, imaginative, and perfect for winding down.
+            Pick a theme, add a name, choose a setting, and watch a beautiful story come to life. Gentle, playful, and made to calm busy evenings.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/sign-up">
               <Button className="bg-gradient-to-r from-bloom-plum to-bloom-teal hover:shadow-bloom w-full sm:w-auto" size="lg">
                 <Wand2 className="h-5 w-5 mr-2" />
-                Create Your First Story
+                Start My First Story
               </Button>
             </Link>
             <Link href="/sign-in">
@@ -68,7 +68,7 @@ export default function HomePage() {
       <section className="section-shell py-16 lg:py-24">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-bloom-ink mb-4">Why parents love MindBloom</h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">Designed to make bedtime easier, magical, and memorable for families</p>
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto">Built to make evenings softer, happier, and easier</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -79,7 +79,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-xl font-bold text-bloom-ink mb-3">Create in Seconds</h3>
             <p className="text-slate-600 leading-relaxed">
-              Just pick a theme, add your child's name and favorite setting. Your personalized story appears almost instantly.
+              Choose a theme, add your child&apos;s name, and pick a setting. Your story shows up fast and feels personal.
             </p>
           </div>
 
@@ -90,7 +90,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-xl font-bold text-bloom-ink mb-3">100% Family-Friendly</h3>
             <p className="text-slate-600 leading-relaxed">
-              Every story is written with care—no scary moments, no inappropriate content. Tailored to your child's age.
+              Every story is warm and kid-safe. No harsh surprises, just thoughtful adventures matched to your child&apos;s age.
             </p>
           </div>
 
@@ -101,7 +101,7 @@ export default function HomePage() {
             </div>
             <h3 className="text-xl font-bold text-bloom-ink mb-3">Your Library of Memories</h3>
             <p className="text-slate-600 leading-relaxed">
-              Save and revisit favorite stories. Share them with family. Build a collection your kids will treasure forever.
+              Keep the stories your family loves most. Re-read favorites anytime and build a shelf of feel-good memories.
             </p>
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function HomePage() {
               <div>
                 <h3 className="text-xl font-bold text-bloom-ink mb-2">Pick a theme</h3>
                 <p className="text-slate-600 text-lg">
-                  Adventure, magic, friendship, or comfort. Choose what resonates with your child tonight.
+                  Choose adventure, friendship, wonder, or calm. Match the story to tonight&apos;s mood.
                 </p>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function HomePage() {
               <div>
                 <h3 className="text-xl font-bold text-bloom-ink mb-2">Tell us about your child</h3>
                 <p className="text-slate-600 text-lg">
-                  Age group, favorite character name, and a magical setting. That's all we need.
+                  Share an age range, a name, and a place. That&apos;s enough to make the story feel special.
                 </p>
               </div>
             </div>
@@ -153,7 +153,7 @@ export default function HomePage() {
               <div>
                 <h3 className="text-xl font-bold text-bloom-ink mb-2">Sit back and listen</h3>
                 <p className="text-slate-600 text-lg">
-                  Your story appears word by word. Read it aloud, let them read along, or just enjoy the moment together.
+                  Open your story, read it together, and enjoy the giggles, gasps, and sleepy smiles.
                 </p>
               </div>
             </div>
@@ -170,7 +170,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="text-2xl md:text-3xl font-bold text-bloom-ink mb-6 leading-relaxed">
-            "My kids actually look forward to bedtime now. The stories are so perfect and personalized—it feels magical."
+            &ldquo;Bedtime used to be a struggle. Now my kids race to pick tonight&apos;s story.&rdquo;
           </p>
           <p className="text-lg text-slate-600">— Sarah, parent of two</p>
         </div>
@@ -181,7 +181,7 @@ export default function HomePage() {
         <div className="rounded-3xl bg-gradient-to-br from-bloom-plum via-bloom-teal to-bloom-coral p-12 md:p-16 text-white text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready for bedtime magic?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Create your first story free. No credit card needed. Start building memories tonight.
+            Create your first story in minutes and make tonight feel extra special.
           </p>
           <Link href="/sign-up">
             <Button className="bg-white text-bloom-plum hover:bg-bloom-cream font-bold text-lg" size="lg">

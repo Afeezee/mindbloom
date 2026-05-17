@@ -126,7 +126,7 @@ export interface StoryBuilderInput {
   bookSize: BookSize;
 }
 
-export interface StoryGenerationParams extends StoryBuilderInput {}
+export type StoryGenerationParams = StoryBuilderInput;
 
 export interface BookDraft {
   title: string;

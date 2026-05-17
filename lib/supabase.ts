@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { createBrowserClient, createServerClient } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { requireConfiguredValue } from '@/lib/service-config';
 import {
