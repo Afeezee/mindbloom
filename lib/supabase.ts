@@ -339,6 +339,10 @@ export async function saveStory(input: SaveStoryInput): Promise<Story> {
     throw new Error(extractErrorMessage(error) || 'Unable to save story.');
   }
 
+  if (!data) {
+    throw new Error('Unable to save story.');
+  }
+
   return mapStory(data);
 }
 
@@ -458,6 +462,10 @@ export async function updateStory(
 
   if (error) {
     throw new Error(extractErrorMessage(error) || 'Unable to update story.');
+  }
+
+  if (!data) {
+    throw new Error('Unable to update story.');
   }
 
   const likeStats = await getLikeStatsByStoryIds([data.id], userId);

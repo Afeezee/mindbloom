@@ -27,7 +27,7 @@ function escapeHtml(value: string) {
     .replace(/'/g, '&#39;');
 }
 
-function splitStoryContent(content: string) {
+function splitStoryContent(content: string): StoryPageDraft[] {
   return content
     .split(/\n\n--- PAGE ---\n\n/)
     .map((chunk) => chunk.trim())
@@ -36,7 +36,7 @@ function splitStoryContent(content: string) {
       pageNumber: index + 1,
       text,
       illustrationPrompt: '',
-    } satisfies StoryPageDraft));
+    }));
 }
 
 function getStoryPages(story: Awaited<ReturnType<typeof getStoryById>>) {
@@ -59,6 +59,22 @@ async function fetchImageBytes(imageUrl: string, baseUrl: string) {
     bytes: new Uint8Array(await response.arrayBuffer()),
     contentType: response.headers.get('content-type') ?? 'image/jpeg',
   };
+}
+
+function getDocxImageType(contentType: string) {
+  if (contentType.includes('png')) {
+    return 'png' as const;
+  }
+
+  if (contentType.includes('gif')) {
+    return 'gif' as const;
+  }
+
+  if (contentType.includes('bmp')) {
+    return 'bmp' as const;
+  }
+
+  return 'jpg' as const;
 }
 
 function buildPrintableHtml(story: NonNullable<Awaited<ReturnType<typeof getStoryById>>>, authorName: string, baseUrl: string) {
@@ -189,6 +205,7 @@ async function exportDocx(
 ) {
   const pages = getStoryPages(story);
   const coverImageData = story.coverImageUrl ? await fetchImageBytes(story.coverImageUrl, baseUrl).catch(() => null) : null;
+  const summary = story.content.split(/\n{2,}/).filter(Boolean)[0] ?? story.content.slice(0, 220);
   const children: Paragraph[] = [];
 
   children.push(
@@ -208,6 +225,7 @@ async function exportDocx(
         alignment: AlignmentType.CENTER,
         children: [
           new ImageRun({
+              type: getDocxImageType(coverImageData.contentType),
             data: Buffer.from(coverImageData.bytes),
             transformation: { width: 400, height: 560 },
           }),
@@ -216,11 +234,11 @@ async function exportDocx(
     );
   }
 
-  if (story.summary) {
+  if (summary) {
     children.push(
       new Paragraph({
         alignment: AlignmentType.CENTER,
-        children: [new TextRun({ text: story.summary, size: 22 })],
+        children: [new TextRun({ text: summary, size: 22 })],
       }),
     );
   }
@@ -243,6 +261,7 @@ async function exportDocx(
           alignment: AlignmentType.CENTER,
           children: [
             new ImageRun({
+              type: getDocxImageType(pageImageData.contentType),
               data: Buffer.from(pageImageData.bytes),
               transformation: { width: 400, height: 560 },
             }),
@@ -306,7 +325,7 @@ export async function GET(request: Request, { params }: StoryExportRouteContext)
 
     if (format === 'docx') {
       const fileBuffer = await exportDocx(story, getAuthorName(user), baseUrl);
-      return new Response(fileBuffer, {
+      return new Response(new Uint8Array(fileBuffer), {
         status: 200,
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

@@ -32,7 +32,9 @@ function getModelCandidates() {
     .map((value) => value.trim())
     .filter(Boolean);
 
-  return Array.from(new Set([configuredModel, ...(configuredCandidates ?? []), ...DEFAULT_MODEL_CANDIDATES].filter(Boolean)));
+  return Array.from(
+    new Set([configuredModel, ...(configuredCandidates ?? []), ...DEFAULT_MODEL_CANDIDATES].filter((value): value is string => Boolean(value))),
+  );
 }
 
 function isModelNotFoundError(error: unknown) {
